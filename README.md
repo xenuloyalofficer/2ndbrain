@@ -92,3 +92,38 @@ When making architectural decisions, log them in the project's `DECISIONS.md`.
 
 - **Audit Script**: Run `docs/cli-prompts/00-full-project-audit.md` in each project
 - **Template**: Use `projects/PROJECT_TEMPLATE.md` for new project audits
+
+---
+
+## 🌐 Deployment
+
+### GitHub Repository
+- **URL**: https://github.com/xenuloyalofficer/2ndbrain
+- **Branch**: `main`
+- **Access**: Private repository (owner: xenuloyalofficer)
+
+### Vercel (Ready for Future Deployment)
+- **Status**: Configured, not deployed yet
+- **Token**: Set up and ready
+- **Use Case**: When adding a documentation website (Nextra, VitePress, etc.)
+
+See `DEPLOYMENT.md` for detailed deployment instructions.
+
+---
+
+## 🔐 Access for Clawbot
+
+Clawbot can access this 2nd Brain via:
+1. **GitHub API** - Read documentation files directly from repository
+2. **Local Files** - When running locally with Claude Code
+3. **Vercel** (future) - When deployed as a documentation site
+
+---
+
+## 📊 Stats
+
+- **Total Projects**: 7 (6 documented, 1 pending)
+- **Documentation Lines**: ~11,000+ lines
+- **Tech Stack Guides**: 3 (Next.js, Convex, Clerk)
+- **Pattern Guides**: 0 (planned)
+- **Workflow Guides**: 0 (planned)
