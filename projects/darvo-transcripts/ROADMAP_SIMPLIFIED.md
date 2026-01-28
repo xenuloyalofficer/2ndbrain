@@ -175,28 +175,53 @@
 
 ### Week 5: Static Site Foundation
 
+**Design Reference**: https://jenna-darvo.vercel.app/
+
+**Design Principles** (from reference site):
+- **Dark professional theme** - Navy/deep backgrounds, coral accents, cream text
+- **Typography hierarchy**:
+  - Headers: Bebas Neue (or similar bold sans-serif)
+  - Data/quotes: JetBrains Mono (monospace for authenticity)
+  - UI/body: Inter (clean, readable)
+- **Modular grid layout** - Clear sections, organized categories
+- **Metadata transparency** - "All quotes directly from transcripts"
+- **Evidence categorization** - Separate pages per technique
+- **Footer stats** - "X messages analyzed" (credibility marker)
+
 - [ ] **Day 1: Choose Framework** (Half day)
-  - **Option A**: Astro (recommended for static sites)
-  - **Option B**: Next.js static export
+  - **Option A**: Next.js (matches reference site) ← Recommended
+  - **Option B**: Astro (simpler for static)
   - **Option C**: Plain HTML + Tailwind CSS
 
 - [ ] **Day 1-2: Site Structure** (1.5 days)
-  - Homepage:
-    - Project title
-    - Summary stats (# videos, # mentions, # clips)
-    - Key findings (most toxic videos, top techniques)
-  - Timeline page:
-    - Chronological list of mentions
-    - Filter by date range
-  - By Person page:
-    - Mentions grouped by person
-    - Sentiment chart per person
-  - By Technique page:
-    - Mentions grouped by technique
-    - Frequency chart
-  - Clips page:
-    - Embedded video clips
-    - Or download links
+  - **Homepage**:
+    - Hero: Project title, tagline
+    - Summary stats: "X videos analyzed, Y mentions found, Z clips extracted"
+    - Key findings: Most mentioned people, top techniques
+    - Quick navigation to evidence categories
+
+  - **Evidence Pages** (one per technique):
+    - `/darvo` - DARVO instances with quotes
+    - `/gaslighting` - Gaslighting examples
+    - `/character-assassination` - Character attacks
+    - `/audience-weaponization` - Mob harassment
+    - Each page: Categorized evidence with timestamps + video embeds
+
+  - **By Person Page**:
+    - List of all mentioned people
+    - Click person → See all mentions of that person
+    - Sentiment chart (positive vs. negative mentions)
+
+  - **Methodology Page**:
+    - How analysis was done
+    - AI models used
+    - Classification criteria
+    - Limitations and disclaimers
+
+  - **About Page**:
+    - Project purpose
+    - "All quotes directly from video transcripts"
+    - Contact/feedback
 
 - [ ] **Day 3: Data Visualization** (Full day)
   - Install Chart.js or Recharts

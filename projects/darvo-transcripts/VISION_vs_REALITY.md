@@ -187,17 +187,32 @@ Publish: Generate interactive website
 - Data visualizations
 - Public URL for sharing research
 
+**Design Reference**: https://jenna-darvo.vercel.app/
+
+**Design Requirements** (from reference):
+- **Dark professional theme**: Navy backgrounds, coral accents, cream text
+- **Typography hierarchy**:
+  - Bebas Neue (headers) - Bold, attention-grabbing
+  - JetBrains Mono (quotes/data) - Monospace for authenticity
+  - Inter (body text) - Clean, readable
+- **Modular layout**: Clear sections, organized categories
+- **Evidence categorization**: Separate pages per technique (DARVO, Gaslighting, etc.)
+- **Metadata transparency**: "All quotes from transcripts", "X messages analyzed"
+- **Footer with stats**: Credibility markers ("6,176+ messages analyzed")
+- **Professional credibility**: Technical aesthetic conveys analytical rigor
+
 **Current State**:
 - Output is markdown reports only
 - No website generation
 - No data visualization
 
 **What's Needed**:
-- Static site generator (HTML + JS)
-- Charts library (Chart.js, Recharts)
-- Video player (embedded clips)
+- Next.js (matches reference site architecture)
+- Tailwind CSS (for dark theme)
+- Charts library (Chart.js or Recharts)
+- Video player (embedded clips or YouTube embeds)
 - Search/filter functionality
-- Deploy to Vercel or GitHub Pages
+- Deploy to Vercel
 
 ### 6. Comment/Live Chat Analysis (NOT IMPLEMENTED)
 **Problem**: Can't analyze comments or live chat toxicity
