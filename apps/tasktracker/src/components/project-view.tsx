@@ -4,9 +4,9 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useState } from "react";
 import { Id } from "../../convex/_generated/dataModel";
-import { 
+import {
   ChevronLeft,
-  CheckCircle2, 
+  CheckCircle2,
   Circle,
   Clock,
   AlertCircle,
@@ -17,7 +17,8 @@ import {
   ExternalLink,
   MoreHorizontal,
   Play,
-  Undo2
+  Undo2,
+  X
 } from "lucide-react";
 
 interface ProjectViewProps {
@@ -38,7 +39,7 @@ export function ProjectView({ projectId, onBack }: ProjectViewProps) {
   });
 
   const project = projects?.find(p => p._id === projectId);
-  
+
   if (!project || !tasks) return <ProjectLoading />;
 
   const blockedTasks = tasks.filter(t => t.status === "blocked");
@@ -53,33 +54,35 @@ export function ProjectView({ projectId, onBack }: ProjectViewProps) {
   return (
     <div className="min-h-screen pb-24">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#09090b]/80 border-b border-[#27272a]">
-        <div className="max-w-4xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-4">
-            <button 
+      <header className="sticky top-0 z-50 glass border-b border-white/5 mx-4 mt-4 rounded-2xl">
+        <div className="max-w-5xl mx-auto px-6 py-5">
+          <div className="flex items-center gap-6">
+            <button
               onClick={onBack}
-              className="p-2 rounded-xl hover:bg-[#1a1a1f] transition-colors"
+              className="p-2.5 rounded-xl hover:bg-white/5 transition-all active:scale-95 group border border-white/5"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-5 h-5 text-white/50 group-hover:text-white" />
             </button>
-            
-            <div className="flex-1">
-              <h1 className="text-xl font-bold">{project.name}</h1>
-              <p className="text-sm text-zinc-500">{project.description}</p>
+
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl font-black tracking-tight text-white/90 truncate">{project.name}</h1>
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mt-1 truncate">{project.description}</p>
             </div>
 
-            <div className="text-right">
-              <div className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-emerald-400 bg-clip-text text-transparent">
-                {project.completionPercent}%
+            <div className="text-right flex items-center gap-6">
+              <div>
+                <div className="text-3xl font-black text-white tabular-nums">
+                  {project.completionPercent}<span className="text-accent text-xl ml-1">%</span>
+                </div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-1">{project.doneTasks}/{project.totalTasks} operations</p>
               </div>
-              <p className="text-xs text-zinc-500">{project.doneTasks}/{project.totalTasks} tasks</p>
             </div>
           </div>
 
           {/* Progress Bar */}
-          <div className="mt-4 h-2 bg-zinc-800 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-amber-500 via-yellow-500 to-emerald-500 rounded-full transition-all duration-500"
+          <div className="mt-6 h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
+            <div
+              className="h-full bg-gradient-to-r from-accent via-purple to-success rounded-full transition-all duration-1000"
               style={{ width: `${project.completionPercent}%` }}
             />
           </div>
@@ -88,24 +91,24 @@ export function ProjectView({ projectId, onBack }: ProjectViewProps) {
 
       <main className="max-w-4xl mx-auto px-6 py-8 space-y-6">
         {/* Quick Actions */}
-        <div className="flex gap-3">
-          <button 
+        <div className="flex gap-4">
+          <button
             onClick={() => setShowAddTask(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-semibold rounded-xl transition-all hover:shadow-lg hover:shadow-amber-500/25"
+            className="group flex items-center gap-2.5 px-6 py-3 bg-accent hover:bg-accent-hover text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all hover:shadow-[0_0_20px_rgba(249,115,22,0.4)] hover:-translate-y-0.5"
           >
-            <Plus className="w-4 h-4" />
-            Add Task
+            <Plus className="w-4 h-4 transition-transform group-hover:rotate-90" />
+            Initialize Task
           </button>
-          
+
           {project.githubPath && (
-            <a 
+            <a
               href={project.githubPath}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2.5 border border-[#27272a] rounded-xl hover:bg-[#1a1a1f] transition-colors"
+              className="group flex items-center gap-2.5 px-6 py-3 border border-white/5 rounded-2xl hover:bg-white/5 text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-white transition-all"
             >
-              <ExternalLink className="w-4 h-4" />
-              GitHub
+              <ExternalLink className="w-4 h-4 text-white/30 group-hover:text-white" />
+              Source Control
             </a>
           )}
         </div>
@@ -183,7 +186,7 @@ export function ProjectView({ projectId, onBack }: ProjectViewProps) {
 
       {/* Add Task Modal */}
       {showAddTask && (
-        <QuickAddModal 
+        <QuickAddModal
           projectId={projectId}
           onClose={() => setShowAddTask(false)}
         />
@@ -192,15 +195,15 @@ export function ProjectView({ projectId, onBack }: ProjectViewProps) {
   );
 }
 
-function TaskSection({ 
-  title, 
-  icon, 
-  count, 
-  color, 
-  expanded, 
-  onToggle, 
-  children 
-}: { 
+function TaskSection({
+  title,
+  icon,
+  count,
+  color,
+  expanded,
+  onToggle,
+  children
+}: {
   title: string;
   icon: React.ReactNode;
   count: number;
@@ -217,19 +220,23 @@ function TaskSection({
   };
 
   return (
-    <div className={`rounded-2xl border ${colorClasses[color]} overflow-hidden`}>
-      <button 
+    <div className={`rounded-3xl border ${colorClasses[color]} overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500 backdrop-blur-sm`}>
+      <button
         onClick={onToggle}
-        className="w-full flex items-center gap-3 p-4 hover:bg-white/5 transition-colors"
+        className="w-full flex items-center gap-4 p-5 hover:bg-white/5 transition-all group"
       >
-        {icon}
-        <span className="font-semibold">{title}</span>
-        <span className="text-sm text-zinc-500">({count})</span>
-        <ChevronDown className={`ml-auto w-5 h-5 text-zinc-500 transition-transform ${expanded ? '' : '-rotate-90'}`} />
+        <div className="p-2 rounded-xl glass group-hover:scale-110 transition-transform duration-300">
+          {icon}
+        </div>
+        <span className="text-sm font-black uppercase tracking-widest text-white/90">{title}</span>
+        <span className="text-xs font-bold text-muted-foreground opacity-50 tabular-nums">({count})</span>
+        <div className={`ml-auto p-1.5 rounded-lg glass transition-transform duration-300 ${expanded ? '' : '-rotate-90'}`}>
+          <ChevronDown className="w-4 h-4 text-white/30" />
+        </div>
       </button>
-      
+
       {expanded && (
-        <div className="px-4 pb-4 space-y-2">
+        <div className="px-5 pb-5 space-y-3">
           {children}
         </div>
       )}
@@ -237,7 +244,7 @@ function TaskSection({
   );
 }
 
-function ProjectTaskCard({ task }: { 
+function ProjectTaskCard({ task }: {
   task: {
     _id: Id<"tasks">;
     title: string;
@@ -280,16 +287,16 @@ function ProjectTaskCard({ task }: {
   };
 
   return (
-    <div className="group relative bg-[#141417] border border-[#27272a] rounded-xl p-4 hover:border-[#3f3f46] transition-colors">
-      <div className="flex items-start gap-3">
+    <div className="group relative glass-card p-5 rounded-2xl animate-in slide-in-from-left-2 duration-300">
+      <div className="flex items-start gap-4">
         {/* Checkbox */}
-        <button 
+        <button
           onClick={isDone ? handleUndo : handleComplete}
           className={`
-            mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all shrink-0
-            ${isDone 
-              ? 'bg-emerald-500 border-emerald-500 hover:bg-emerald-600' 
-              : 'border-zinc-600 hover:border-amber-500 hover:bg-amber-500/10'
+            mt-1 w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all shrink-0 checkmark-bounce
+            ${isDone
+              ? 'bg-success border-success hover:bg-success-hover'
+              : 'border-white/20 hover:border-accent hover:bg-accent/10'
             }
           `}
           title={isDone ? "Undo - mark as not done" : "Mark as done"}
@@ -299,26 +306,26 @@ function ProjectTaskCard({ task }: {
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h4 className={`font-medium ${isDone ? 'line-through text-zinc-500' : ''}`}>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h4 className={`text-sm font-bold tracking-tight transition-all ${isDone ? 'line-through text-white/20' : 'text-white/90 group-hover:text-white'}`}>
               {task.title}
             </h4>
-            
+
             {isInProgress && (
-              <span className="text-xs px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 flex items-center gap-1">
+              <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-accent/10 text-accent border border-accent/20 flex items-center gap-1.5">
                 <Clock className="w-3 h-3" />
-                In Progress
+                Live
               </span>
             )}
-            
+
             {task.listPriority === "today" && (
-              <span className="text-xs px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400">
-                TODAY
+              <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-accent/10 text-accent border border-accent/20">
+                Today
               </span>
             )}
             {task.listPriority === "this_week" && (
-              <span className="text-xs px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400">
-                WEEK
+              <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-purple/10 text-purple border border-purple/20">
+                Week
               </span>
             )}
           </div>
@@ -328,14 +335,14 @@ function ProjectTaskCard({ task }: {
           )}
 
           {hasSubtasks && (
-            <div className="flex items-center gap-2 mt-2">
-              <div className="w-24 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full"
+            <div className="flex items-center gap-3 mt-3">
+              <div className="w-24 h-1 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                <div
+                  className="h-full bg-gradient-to-r from-accent to-success rounded-full transition-all duration-1000"
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <span className="text-xs text-zinc-500">{task.doneSubtasks}/{task.totalSubtasks}</span>
+              <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{task.doneSubtasks}/{task.totalSubtasks}</span>
             </div>
           )}
         </div>
@@ -343,7 +350,7 @@ function ProjectTaskCard({ task }: {
         {/* Actions */}
         {!isDone && (
           <div className="relative">
-            <button 
+            <button
               onClick={() => setShowActions(!showActions)}
               className="p-1.5 rounded-lg hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
             >
@@ -353,29 +360,29 @@ function ProjectTaskCard({ task }: {
             {showActions && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setShowActions(false)} />
-                <div className="absolute right-0 top-8 z-20 bg-[#1a1a1f] border border-[#27272a] rounded-xl p-1 shadow-xl min-w-[160px]">
+                <div className="absolute right-0 top-10 z-20 glass rounded-xl p-1.5 shadow-2xl min-w-[170px] animate-in fade-in zoom-in-95 duration-200">
                   {!isInProgress && (
-                    <button 
+                    <button
                       onClick={() => { handleStart(); setShowActions(false); }}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-zinc-700 rounded-lg transition-colors"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-[10px] font-black uppercase tracking-widest text-success hover:bg-success/10 rounded-lg transition-colors"
                     >
-                      <Play className="w-4 h-4 text-emerald-500" />
-                      Start Working
+                      <Play className="w-4 h-4" />
+                      Initialize
                     </button>
                   )}
-                  <button 
+                  <button
                     onClick={addToToday}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-zinc-700 rounded-lg transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 text-[10px] font-black uppercase tracking-widest text-accent hover:bg-accent/10 rounded-lg transition-colors"
                   >
-                    <Flame className="w-4 h-4 text-amber-500" />
-                    Add to Today
+                    <Flame className="w-4 h-4" />
+                    Set to Today
                   </button>
-                  <button 
+                  <button
                     onClick={addToWeek}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-zinc-700 rounded-lg transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 text-[10px] font-black uppercase tracking-widest text-purple hover:bg-purple/10 rounded-lg transition-colors"
                   >
-                    <Calendar className="w-4 h-4 text-purple-500" />
-                    Add to Week
+                    <Calendar className="w-4 h-4" />
+                    Set to Week
                   </button>
                 </div>
               </>
@@ -387,7 +394,7 @@ function ProjectTaskCard({ task }: {
   );
 }
 
-function QuickAddModal({ projectId, onClose }: { 
+function QuickAddModal({ projectId, onClose }: {
   projectId: Id<"projects">;
   onClose: () => void;
 }) {
@@ -414,38 +421,49 @@ function QuickAddModal({ projectId, onClose }: {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-      <div 
-        className="relative bg-[#141417] border border-[#27272a] rounded-2xl p-6 w-full max-w-md shadow-2xl"
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300" onClick={onClose}>
+      <div className="absolute inset-0 bg-background/80 backdrop-blur-md" />
+      <div
+        className="relative glass rounded-3xl p-8 w-full max-w-md shadow-2xl border-white/10 animate-in zoom-in-95 slide-in-from-bottom-10 duration-500"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-lg font-bold mb-4">Add Task</h2>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="What needs to be done?"
-            className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500/50 transition-colors"
-            autoFocus
-          />
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-2xl font-black tracking-tight text-white/90">Initialize Task</h2>
+            <p className="text-sm text-muted-foreground mt-1">What's the next mission?</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-xl transition-colors">
+            <X className="w-5 h-5 text-muted-foreground" />
+          </button>
+        </div>
 
-          <div className="flex gap-3">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block px-1">Concept</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter task description..."
+              className="w-full bg-white/5 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder:text-white/20 focus:outline-none focus:border-accent/40 focus:bg-white/[0.08] transition-all font-medium"
+              autoFocus
+            />
+          </div>
+
+          <div className="flex gap-4 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-3 border border-[#27272a] rounded-xl hover:bg-[#1a1a1f] transition-colors"
+              className="flex-1 px-6 py-4 rounded-2xl border border-white/5 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:bg-white/5 transition-all"
             >
-              Cancel
+              Discard
             </button>
             <button
               type="submit"
               disabled={isSubmitting || !title.trim()}
-              className="flex-1 px-4 py-3 bg-amber-500 hover:bg-amber-400 text-black font-semibold rounded-xl transition-colors disabled:opacity-50"
+              className="flex-[2] px-6 py-4 bg-accent hover:bg-accent-hover text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all disabled:opacity-50 shadow-xl shadow-accent/20 active:scale-95"
             >
-              Add
+              {isSubmitting ? "Processing..." : "Deploy Task"}
             </button>
           </div>
         </form>

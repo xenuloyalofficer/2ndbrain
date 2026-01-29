@@ -4,11 +4,11 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useState } from "react";
 import { Id } from "../../convex/_generated/dataModel";
-import { 
-  Flame, 
-  Calendar, 
-  CheckCircle2, 
-  Plus, 
+import {
+  Flame,
+  Calendar,
+  CheckCircle2,
+  Plus,
   ChevronRight,
   Clock,
   Sparkles,
@@ -25,7 +25,7 @@ export function DailyView() {
   const doneTasks = useQuery(api.tasks.listDoneThisWeek);
   const projects = useQuery(api.projects.list);
   const actionLogs = useQuery(api.actionLogs.list, { limit: 8 });
-  
+
   const [showAddModal, setShowAddModal] = useState(false);
   const [showPickerModal, setShowPickerModal] = useState(false);
   const [showDone, setShowDone] = useState(false);
@@ -37,46 +37,53 @@ export function DailyView() {
   // Filter out done tasks from today/week lists
   const activeTodayTasks = todayTasks.filter(t => t.status !== "done");
   const activeWeekTasks = weekTasks.filter(t => t.status !== "done");
-  
+
   const todayCount = activeTodayTasks.length;
 
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen pb-24 selection:bg-accent/30">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#09090b]/80 border-b border-[#27272a]">
-        <div className="max-w-6xl mx-auto px-6 py-4">
+      <header className="sticky top-0 z-50 glass border-b border-white/5 mx-4 mt-4 rounded-2xl">
+        <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-5">
               {/* Rune Avatar */}
-              <div className="relative">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 flex items-center justify-center text-xl shadow-lg shadow-amber-500/20">
-                  🤖
+              <div className="relative group">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-accent via-orange-500 to-purple flex items-center justify-center text-xl shadow-lg shadow-accent/20 transition-transform group-hover:scale-105 duration-300">
+                  <Sparkles className="w-6 h-6 text-white" />
                 </div>
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-[#09090b] online-indicator" />
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-success rounded-full border-2 border-background online-indicator" />
               </div>
               <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
-                  Rune Dashboard
+                <h1 className="text-xl font-bold tracking-tight text-white/90">
+                  Rune <span className="text-accent underline decoration-accent/30 underline-offset-4">Dashboard</span>
                 </h1>
-                <p className="text-sm text-zinc-500">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest mt-0.5">
                   {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-6">
               {/* Today Progress */}
-              <div className="text-right mr-2">
-                <div className="text-2xl font-bold text-amber-500">{todayCount}/3</div>
-                <p className="text-xs text-zinc-500">today</p>
+              <div className="hidden sm:flex items-center gap-4 bg-white/5 px-4 py-2 rounded-xl border border-white/5">
+                <div className="text-right">
+                  <div className="text-sm font-bold text-accent">{todayCount}/3 tasks</div>
+                  <div className="w-20 h-1 bg-white/10 rounded-full mt-1 overflow-hidden">
+                    <div
+                      className="h-full bg-accent transition-all duration-500"
+                      style={{ width: `${(todayCount / 3) * 100}%` }}
+                    />
+                  </div>
+                </div>
               </div>
 
-              <button 
+              <button
                 onClick={() => setShowAddModal(true)}
-                className="flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-semibold rounded-xl transition-all hover:shadow-lg hover:shadow-amber-500/25"
+                className="group flex items-center gap-2 px-5 py-2.5 bg-accent hover:bg-accent-hover text-white font-bold rounded-xl transition-all hover:shadow-[0_0_20px_rgba(249,115,22,0.4)] hover:-translate-y-0.5 active:translate-y-0"
               >
-                <Plus className="w-4 h-4" />
-                Add Task
+                <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
+                <span>New Task</span>
               </button>
             </div>
           </div>
@@ -87,24 +94,24 @@ export function DailyView() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            
+
             {/* TODAY Section */}
-            <section>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-amber-500/15 rounded-xl">
-                  <Flame className="w-5 h-5 text-amber-500" />
+            <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2.5 bg-accent/10 rounded-xl border border-accent/20">
+                  <Flame className="w-5 h-5 text-accent" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold">Today</h2>
-                  <p className="text-xs text-zinc-500">Focus on these 3 things</p>
+                  <h2 className="text-xl font-bold tracking-tight text-white/90">Daily Focus</h2>
+                  <p className="text-sm text-muted-foreground">The most important 3 things</p>
                 </div>
-                <div className="ml-auto flex items-center gap-2">
-                  <span className="text-xs text-zinc-500">{todayCount}/3</span>
-                  <div className="flex gap-1">
+                <div className="ml-auto flex items-center gap-3">
+                  <span className="text-sm font-bold text-muted-foreground/50 tracking-tighter">{todayCount}<span className="mx-0.5">/</span>3</span>
+                  <div className="flex gap-1.5 p-1 bg-white/5 rounded-full border border-white/5">
                     {[0, 1, 2].map((i) => (
-                      <div 
-                        key={i} 
-                        className={`w-2 h-2 rounded-full ${i < todayCount ? 'bg-amber-500' : 'bg-zinc-700'}`}
+                      <div
+                        key={i}
+                        className={`w-2.5 h-2.5 rounded-full transition-all duration-500 ${i < todayCount ? 'bg-accent shadow-[0_0_8px_rgba(249,115,22,0.6)]' : 'bg-white/10'}`}
                       />
                     ))}
                   </div>
@@ -115,40 +122,42 @@ export function DailyView() {
                 {activeTodayTasks.map((task) => (
                   <TaskCard key={task._id} task={task} variant="today" />
                 ))}
-                
+
                 {todayCount < 3 && (
-                  <EmptySlots 
-                    count={3 - todayCount} 
+                  <EmptySlots
+                    count={3 - todayCount}
                     onPick={() => setShowPickerModal(true)}
-                    onAdd={() => setShowAddModal(true)} 
+                    onAdd={() => setShowAddModal(true)}
                   />
                 )}
               </div>
             </section>
 
             {/* THIS WEEK Section */}
-            <section>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-purple-500/15 rounded-xl">
-                  <Calendar className="w-5 h-5 text-purple-500" />
+            <section className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2.5 bg-purple/10 rounded-xl border border-purple/20">
+                  <Calendar className="w-5 h-5 text-purple" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold">This Week</h2>
-                  <p className="text-xs text-zinc-500">Click 🔥 to move to Today</p>
+                  <h2 className="text-xl font-bold tracking-tight text-white/90">Coming Up</h2>
+                  <p className="text-sm text-muted-foreground">Tasks for this week</p>
                 </div>
-                <span className="ml-auto text-sm text-zinc-500">{activeWeekTasks.length} tasks</span>
+                <span className="ml-auto bg-white/5 px-3 py-1 rounded-full text-xs font-bold text-muted-foreground border border-white/5">
+                  {activeWeekTasks.length} queued
+                </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {activeWeekTasks.map((task) => (
                   <TaskCard key={task._id} task={task} variant="week" />
                 ))}
-                
+
                 {activeWeekTasks.length === 0 && (
                   <div className="col-span-2 py-12 text-center bg-[#141417] border border-[#27272a] rounded-2xl">
                     <Calendar className="w-8 h-8 text-zinc-700 mx-auto mb-2" />
                     <p className="text-sm text-zinc-500">No tasks queued for this week</p>
-                    <button 
+                    <button
                       onClick={() => setShowAddModal(true)}
                       className="mt-3 text-sm text-purple-400 hover:text-purple-300"
                     >
@@ -161,7 +170,7 @@ export function DailyView() {
 
             {/* DONE THIS WEEK Section */}
             <section>
-              <button 
+              <button
                 onClick={() => setShowDone(!showDone)}
                 className="flex items-center gap-3 mb-4 w-full text-left"
               >
@@ -176,12 +185,12 @@ export function DailyView() {
               </button>
 
               {showDone && (
-                <div className="space-y-2 bg-[#141417] border border-[#27272a] rounded-2xl p-4">
+                <div className="space-y-1 glass p-5 rounded-2xl animate-in fade-in zoom-in-95 duration-300">
                   {doneTasks.map((task) => (
                     <DoneTaskRow key={task._id} task={task} />
                   ))}
                   {doneTasks.length === 0 && (
-                    <p className="text-sm text-zinc-600 py-4 text-center">Nothing completed yet. Let&apos;s change that!</p>
+                    <p className="text-sm text-muted-foreground py-6 text-center italic">Nothing completed yet. Time to crush some goals! 🚀</p>
                   )}
                 </div>
               )}
@@ -191,20 +200,23 @@ export function DailyView() {
           {/* Sidebar */}
           <aside className="space-y-6">
             {/* Quick Stats */}
-            <div className="bg-[#141417] border border-[#27272a] rounded-2xl p-5">
-              <h3 className="text-sm font-semibold text-zinc-400 mb-4">This Week</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-zinc-500">Completed</span>
-                  <span className="text-2xl font-bold text-emerald-500">{doneTasks.length}</span>
+            <div className="glass p-6 rounded-2xl animate-in fade-in slide-in-from-right-4 duration-700">
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-2">
+                <div className="w-1 h-3 bg-accent rounded-full" />
+                Performance
+              </h3>
+              <div className="space-y-5">
+                <div className="flex items-center justify-between group">
+                  <span className="text-sm text-muted-foreground group-hover:text-white transition-colors">Completed</span>
+                  <span className="text-xl font-black text-success tabular-nums">{doneTasks.length}</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-zinc-500">In Queue</span>
-                  <span className="text-2xl font-bold text-purple-500">{activeWeekTasks.length}</span>
+                <div className="flex items-center justify-between group">
+                  <span className="text-sm text-muted-foreground group-hover:text-white transition-colors">In Queue</span>
+                  <span className="text-xl font-black text-purple tabular-nums">{activeWeekTasks.length}</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-zinc-500">Active Projects</span>
-                  <span className="text-2xl font-bold text-amber-500">
+                <div className="flex items-center justify-between group">
+                  <span className="text-sm text-muted-foreground group-hover:text-white transition-colors">Active Projects</span>
+                  <span className="text-xl font-black text-accent tabular-nums">
                     {projects.filter(p => p.status === 'active').length}
                   </span>
                 </div>
@@ -212,57 +224,63 @@ export function DailyView() {
             </div>
 
             {/* Action Log */}
-            <div className="bg-[#141417] border border-[#27272a] rounded-2xl p-5">
-              <h3 className="text-sm font-semibold text-zinc-400 mb-4 flex items-center gap-2">
-                <Sparkles className="w-4 h-4" />
-                Activity
+            <div className="glass p-6 rounded-2xl animate-in fade-in slide-in-from-right-8 duration-700 delay-150">
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-2">
+                <div className="w-1 h-3 bg-purple rounded-full" />
+                Pulse
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-5">
                 {actionLogs && actionLogs.length > 0 ? (
                   actionLogs.map((log) => (
-                    <div key={log._id} className="flex gap-3">
-                      <div className="w-1 rounded-full bg-gradient-to-b from-amber-500 to-transparent" />
-                      <div>
-                        <p className="text-sm text-zinc-300">{log.description}</p>
-                        <p className="text-xs text-zinc-600 mt-0.5">
+                    <div key={log._id} className="flex gap-4 group">
+                      <div className="relative flex flex-col items-center">
+                        <div className="w-2 h-2 rounded-full bg-accent group-hover:scale-125 transition-transform" />
+                        <div className="w-px flex-1 bg-white/10 my-1" />
+                      </div>
+                      <div className="pb-1">
+                        <p className="text-xs font-medium text-white/80 leading-relaxed group-hover:text-white transition-colors">{log.description}</p>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
                           {formatTimeAgo(log.timestamp)}
                         </p>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-zinc-600">No recent activity</p>
+                  <p className="text-xs text-muted-foreground italic">Silence is golden...</p>
                 )}
               </div>
             </div>
 
             {/* Projects Quick Access */}
-            <div className="bg-[#141417] border border-[#27272a] rounded-2xl p-5">
-              <h3 className="text-sm font-semibold text-zinc-400 mb-4">Projects</h3>
-              <div className="space-y-2">
+            <div className="glass p-6 rounded-2xl animate-in fade-in slide-in-from-right-12 duration-700 delay-300">
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-2">
+                <div className="w-1 h-3 bg-success rounded-full" />
+                Workspaces
+              </h3>
+              <div className="space-y-3">
                 {projects.slice(0, 5).map((project) => (
-                  <button 
+                  <button
                     key={project._id}
                     onClick={() => {
                       if (typeof window !== "undefined" && (window as any).__tasktracker) {
                         (window as any).__tasktracker.openProject(project._id);
                       }
                     }}
-                    className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-[#1a1a1f] transition-colors text-left"
+                    className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 transition-all group text-left border border-transparent hover:border-white/5"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-zinc-700 to-zinc-800 flex items-center justify-center text-xs">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center text-sm font-black text-white/50 group-hover:text-accent group-hover:bg-accent/10 group-hover:scale-110 transition-all duration-300">
                       {project.name.charAt(0)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{project.name}</p>
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-1 bg-zinc-800 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full"
+                      <p className="text-sm font-bold truncate text-white/90 group-hover:text-white transition-colors">{project.name}</p>
+                      <div className="flex items-center gap-3 mt-1.5">
+                        <div className="flex-1 h-1 bg-white/5 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-accent to-success rounded-full transition-all duration-1000"
                             style={{ width: `${project.completionPercent}%` }}
                           />
                         </div>
-                        <span className="text-xs text-zinc-500">{project.completionPercent}%</span>
+                        <span className="text-[10px] font-black text-muted-foreground">{project.completionPercent}%</span>
                       </div>
                     </div>
                   </button>
@@ -275,9 +293,9 @@ export function DailyView() {
 
       {/* Add Modal */}
       {showAddModal && (
-        <AddTaskModal 
-          projects={projects} 
-          onClose={() => setShowAddModal(false)} 
+        <AddTaskModal
+          projects={projects}
+          onClose={() => setShowAddModal(false)}
         />
       )}
 
@@ -292,7 +310,7 @@ export function DailyView() {
   );
 }
 
-function TaskCard({ task, variant }: { 
+function TaskCard({ task, variant }: {
   task: {
     _id: Id<"tasks">;
     title: string;
@@ -302,8 +320,8 @@ function TaskCard({ task, variant }: {
     totalSubtasks: number;
     doneSubtasks: number;
     blockedReason?: string;
-  }; 
-  variant: "today" | "week" 
+  };
+  variant: "today" | "week"
 }) {
   const updateStatus = useMutation(api.tasks.updateStatus);
   const setPriority = useMutation(api.tasks.setListPriority);
@@ -339,59 +357,63 @@ function TaskCard({ task, variant }: {
   };
 
   return (
-    <div 
+    <div
       className={`
-        group relative bg-[#141417] border rounded-2xl p-4 
-        transition-all duration-200 hover:border-[#3f3f46] hover:bg-[#1a1a1f]
-        ${isToday ? 'border-amber-500/30 hover:border-amber-500/50' : 'border-[#27272a]'}
-        ${isInProgress ? 'ring-1 ring-amber-500/30' : ''}
+        group relative glass-card p-5 rounded-2xl
+        ${isToday ? 'border-accent/20 bg-accent/5' : ''}
+        ${isInProgress ? 'ring-1 ring-accent/30 shadow-[0_0_20px_rgba(249,115,22,0.1)]' : ''}
       `}
     >
       {/* In Progress indicator */}
       {isInProgress && (
-        <div className="absolute top-2 right-2 flex items-center gap-1 text-xs text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-full">
+        <div className="absolute top-3 right-3 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-accent bg-accent/10 px-2 py-1 rounded-full border border-accent/20">
           <Clock className="w-3 h-3" />
-          In Progress
+          Live
         </div>
       )}
 
       <div className="flex items-start gap-4">
         {/* Checkbox */}
-        <button 
+        <button
           onClick={handleComplete}
           className={`
-            mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all
-            ${isToday 
-              ? 'border-amber-500/50 hover:border-amber-500 hover:bg-amber-500/10' 
-              : 'border-zinc-600 hover:border-zinc-500 hover:bg-zinc-800'
+            mt-1 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all checkmark-bounce
+            ${isToday
+              ? 'border-accent/40 hover:border-accent hover:bg-accent/20'
+              : 'border-white/20 hover:border-white/40 hover:bg-white/5'
             }
           `}
           title="Mark as done"
         >
-          <CheckCircle2 className="w-4 h-4 opacity-0 group-hover:opacity-30" />
+          <CheckCircle2 className="w-4 h-4 opacity-0 group-hover:opacity-40" />
         </button>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold pr-20">{task.title}</h3>
-          
-          <div className="flex items-center gap-3 mt-2 flex-wrap">
+          <h3 className="font-bold text-white/90 pr-12 leading-snug group-hover:text-white transition-colors">
+            {task.title}
+          </h3>
+
+          <div className="flex items-center gap-3 mt-3 flex-wrap">
             <span className={`
-              text-xs px-2 py-0.5 rounded-md
-              ${isToday ? 'bg-amber-500/15 text-amber-400' : 'bg-purple-500/15 text-purple-400'}
+              text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border
+              ${isToday
+                ? 'bg-accent/10 text-accent border-accent/20'
+                : 'bg-purple/10 text-purple border-purple/20'
+              }
             `}>
               {task.projectName}
             </span>
 
             {hasSubtasks && (
               <div className="flex items-center gap-2">
-                <div className="w-16 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full transition-all"
+                <div className="w-16 h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                  <div
+                    className="h-full bg-gradient-to-r from-accent to-purple rounded-full transition-all duration-500"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
-                <span className="text-xs text-zinc-500">{task.doneSubtasks}/{task.totalSubtasks}</span>
+                <span className="text-[10px] font-bold text-muted-foreground">{task.doneSubtasks}/{task.totalSubtasks}</span>
               </div>
             )}
 
@@ -407,7 +429,7 @@ function TaskCard({ task, variant }: {
         <div className="flex items-center gap-1">
           {/* Quick action: Move to Today (only for week tasks) */}
           {!isToday && (
-            <button 
+            <button
               onClick={moveToToday}
               className="p-2 rounded-xl hover:bg-amber-500/20 text-zinc-400 hover:text-amber-400 transition-colors"
               title="Move to Today"
@@ -415,10 +437,10 @@ function TaskCard({ task, variant }: {
               <Flame className="w-4 h-4" />
             </button>
           )}
-          
+
           {/* Quick action: Start (only if not in progress) */}
           {!isInProgress && (
-            <button 
+            <button
               onClick={handleStart}
               className="p-2 rounded-xl hover:bg-emerald-500/20 text-zinc-400 hover:text-emerald-400 transition-colors"
               title="Start working"
@@ -429,7 +451,7 @@ function TaskCard({ task, variant }: {
 
           {/* More menu */}
           <div className="relative">
-            <button 
+            <button
               onClick={() => setShowMenu(!showMenu)}
               className="p-2 rounded-xl hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
             >
@@ -439,22 +461,22 @@ function TaskCard({ task, variant }: {
             {showMenu && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-                <div className="absolute right-0 top-10 z-20 bg-[#1a1a1f] border border-[#27272a] rounded-xl p-1 shadow-xl min-w-[160px]">
+                <div className="absolute right-0 top-12 z-20 glass rounded-xl p-1.5 shadow-2xl min-w-[180px] animate-in fade-in zoom-in-95 duration-200">
                   {isToday && (
-                    <button 
+                    <button
                       onClick={moveToWeek}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-zinc-700 rounded-lg transition-colors"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-purple hover:bg-purple/10 rounded-lg transition-colors"
                     >
-                      <Calendar className="w-4 h-4 text-purple-500" />
+                      <Calendar className="w-4 h-4" />
                       Move to Week
                     </button>
                   )}
-                  <button 
+                  <button
                     onClick={removeFromList}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-zinc-700 rounded-lg transition-colors text-zinc-400"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:bg-white/5 rounded-lg transition-colors"
                   >
                     <Archive className="w-4 h-4" />
-                    Back to Backlog
+                    Archive
                   </button>
                 </div>
               </>
@@ -466,7 +488,7 @@ function TaskCard({ task, variant }: {
   );
 }
 
-function DoneTaskRow({ task }: { 
+function DoneTaskRow({ task }: {
   task: {
     _id: Id<"tasks">;
     title: string;
@@ -481,7 +503,7 @@ function DoneTaskRow({ task }: {
   };
 
   return (
-    <div 
+    <div
       className="flex items-center gap-3 py-2 group"
       onMouseEnter={() => setShowUndo(true)}
       onMouseLeave={() => setShowUndo(false)}
@@ -489,9 +511,9 @@ function DoneTaskRow({ task }: {
       <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
       <span className="text-sm line-through text-zinc-500 flex-1">{task.title}</span>
       <span className="text-xs text-zinc-600">{task.projectName}</span>
-      
+
       {showUndo && (
-        <button 
+        <button
           onClick={handleUndo}
           className="p-1 rounded hover:bg-zinc-700 text-zinc-500 hover:text-white transition-colors"
           title="Undo - mark as not done"
@@ -509,22 +531,22 @@ function EmptySlots({ count, onPick, onAdd }: { count: number; onPick: () => voi
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
-          className="w-full p-4 border-2 border-dashed border-zinc-800 rounded-2xl flex items-center justify-center gap-4"
+          className="w-full p-6 border-2 border-dashed border-white/5 rounded-2xl flex items-center justify-center gap-6 group hover:border-accent/30 hover:bg-accent/5 transition-all cursor-pointer"
         >
           <button
             onClick={onPick}
-            className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded-xl transition-colors"
+            className="flex items-center gap-2.5 px-5 py-2.5 bg-accent/10 group-hover:bg-accent text-accent group-hover:text-white rounded-xl transition-all font-bold text-sm"
           >
             <Flame className="w-4 h-4" />
-            <span className="text-sm">Pick from backlog</span>
+            Pick from backlog
           </button>
-          <span className="text-zinc-600">or</span>
+          <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground/30 group-hover:text-accent/30">Or</span>
           <button
             onClick={onAdd}
-            className="flex items-center gap-2 px-4 py-2 hover:bg-zinc-800 text-zinc-400 rounded-xl transition-colors"
+            className="flex items-center gap-2.5 px-5 py-2.5 hover:bg-white/5 text-muted-foreground hover:text-white rounded-xl transition-all font-bold text-sm"
           >
             <Plus className="w-4 h-4" />
-            <span className="text-sm">Create new</span>
+            Create new
           </button>
         </div>
       ))}
@@ -555,32 +577,34 @@ function TaskPickerModal({ projects, onClose }: {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-      <div 
-        className="relative bg-[#141417] border border-[#27272a] rounded-3xl p-6 w-full max-w-lg shadow-2xl max-h-[80vh] flex flex-col"
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300" onClick={onClose}>
+      <div className="absolute inset-0 bg-background/80 backdrop-blur-md" />
+      <div
+        className="relative glass rounded-3xl p-8 w-full max-w-lg shadow-2xl max-h-[85vh] flex flex-col border-white/10 animate-in zoom-in-95 slide-in-from-bottom-10 duration-500"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">Pick a Task for Today</h2>
-          <button onClick={onClose} className="p-2 hover:bg-zinc-800 rounded-xl">
-            <X className="w-5 h-5" />
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-2xl font-black tracking-tight text-white/90">Curate Focus</h2>
+            <p className="text-sm text-muted-foreground mt-1">Select a task from your backlog</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-xl transition-colors">
+            <X className="w-5 h-5 text-muted-foreground" />
           </button>
         </div>
 
         {/* Project selector */}
-        <div className="mb-4">
-          <label className="text-sm text-zinc-400 mb-2 block">From project</label>
-          <div className="flex flex-wrap gap-2">
+        <div className="mb-8">
+          <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4 block">Source Project</label>
+          <div className="flex flex-wrap gap-2.5">
             {projects.map(p => (
               <button
                 key={p._id}
                 onClick={() => setSelectedProject(p._id)}
-                className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
-                  selectedProject === p._id 
-                    ? 'bg-amber-500 text-black font-medium' 
-                    : 'bg-zinc-800 hover:bg-zinc-700'
-                }`}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${selectedProject === p._id
+                  ? 'bg-accent border-accent text-white shadow-lg shadow-accent/20'
+                  : 'bg-white/5 border-white/5 text-muted-foreground hover:border-white/20'
+                  }`}
               >
                 {p.name}
               </button>
@@ -589,29 +613,39 @@ function TaskPickerModal({ projects, onClose }: {
         </div>
 
         {/* Task list */}
-        <div className="flex-1 overflow-y-auto space-y-2">
+        <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
           {!selectedProject && (
-            <p className="text-sm text-zinc-500 text-center py-8">Select a project to see available tasks</p>
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-4">
+                <ChevronRight className="w-6 h-6 text-muted-foreground/30 rotate-90" />
+              </div>
+              <p className="text-sm font-bold text-muted-foreground/50 italic tracking-tight">Select a workspace above</p>
+            </div>
           )}
-          
+
           {selectedProject && availableTasks.length === 0 && (
-            <p className="text-sm text-zinc-500 text-center py-8">No available tasks in backlog</p>
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <CheckCircle2 className="w-10 h-10 text-success/30 mb-4" />
+              <p className="text-sm font-bold text-muted-foreground/50 italic tracking-tight">Project backlog is empty</p>
+            </div>
           )}
 
           {availableTasks.map(task => (
             <button
               key={task._id}
               onClick={() => addToToday(task._id)}
-              className="w-full flex items-center gap-3 p-3 bg-zinc-800/50 hover:bg-zinc-800 rounded-xl transition-colors text-left"
+              className="w-full flex items-center gap-4 p-4 glass-card rounded-2xl transition-all text-left group"
             >
-              <Flame className="w-4 h-4 text-amber-500 shrink-0" />
+              <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center group-hover:bg-accent group-hover:text-white transition-all">
+                <Flame className="w-5 h-5 text-accent group-hover:text-white" />
+              </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium truncate">{task.title}</p>
+                <p className="text-sm font-bold text-white/90 truncate group-hover:text-white">{task.title}</p>
                 {task.totalSubtasks > 0 && (
-                  <p className="text-xs text-zinc-500">{task.doneSubtasks}/{task.totalSubtasks} subtasks</p>
+                  <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground mt-1 group-hover:text-white/50">{task.doneSubtasks}/{task.totalSubtasks} steps</p>
                 )}
               </div>
-              <span className="text-xs text-zinc-500">Add to Today</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-accent opacity-0 group-hover:opacity-100 transition-opacity">Add</span>
             </button>
           ))}
         </div>
@@ -620,9 +654,9 @@ function TaskPickerModal({ projects, onClose }: {
   );
 }
 
-function AddTaskModal({ projects, onClose }: { 
-  projects: Array<{ _id: Id<"projects">; name: string; slug: string }>; 
-  onClose: () => void 
+function AddTaskModal({ projects, onClose }: {
+  projects: Array<{ _id: Id<"projects">; name: string; slug: string }>;
+  onClose: () => void
 }) {
   const createTask = useMutation(api.tasks.create);
   const [title, setTitle] = useState("");
@@ -651,96 +685,101 @@ function AddTaskModal({ projects, onClose }: {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-      <div 
-        className="relative bg-[#141417] border border-[#27272a] rounded-3xl p-6 w-full max-w-md shadow-2xl"
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300" onClick={onClose}>
+      <div className="absolute inset-0 bg-background/80 backdrop-blur-md" />
+      <div
+        className="relative glass rounded-3xl p-8 w-full max-w-md shadow-2xl border-white/10 animate-in zoom-in-95 slide-in-from-bottom-10 duration-500"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-xl font-bold mb-6">Add Task</h2>
-        
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <label className="text-sm text-zinc-400 mb-2 block">Task</label>
+            <h2 className="text-2xl font-black tracking-tight text-white/90">Initialize Task</h2>
+            <p className="text-sm text-muted-foreground mt-1">What's the mission today?</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-xl transition-colors">
+            <X className="w-5 h-5 text-muted-foreground" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block px-1">Concept</label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="What needs to be done?"
-              className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500/50 transition-colors"
+              placeholder="Enter task description..."
+              className="w-full bg-white/5 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder:text-white/20 focus:outline-none focus:border-accent/40 focus:bg-white/[0.08] transition-all font-medium"
               autoFocus
             />
           </div>
 
-          <div>
-            <label className="text-sm text-zinc-400 mb-2 block">Project</label>
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block px-1">Workspace</label>
             <select
               value={projectId as string}
               onChange={(e) => setProjectId(e.target.value as Id<"projects">)}
-              className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500/50 transition-colors"
+              className="w-full bg-white/5 border border-white/5 rounded-2xl px-5 py-4 text-white appearance-none focus:outline-none focus:border-accent/40 focus:bg-white/[0.08] transition-all font-medium cursor-pointer"
             >
               {projects.map(p => (
-                <option key={p._id} value={p._id}>{p.name}</option>
+                <option key={p._id} value={p._id} className="bg-background text-white">{p.name}</option>
               ))}
             </select>
           </div>
 
-          <div>
-            <label className="text-sm text-zinc-400 mb-2 block">Add to</label>
-            <div className="grid grid-cols-3 gap-2">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block px-1">Priority Pipeline</label>
+            <div className="grid grid-cols-3 gap-3">
               <button
                 type="button"
                 onClick={() => setPriority("today")}
-                className={`p-3 rounded-xl border text-sm font-medium transition-all ${
-                  priority === "today" 
-                    ? 'bg-amber-500/15 border-amber-500/50 text-amber-400' 
-                    : 'border-[#27272a] text-zinc-400 hover:border-zinc-600'
-                }`}
+                className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all ${priority === "today"
+                  ? 'bg-accent/10 border-accent text-accent shadow-lg shadow-accent/10'
+                  : 'bg-white/5 border-white/5 text-muted-foreground hover:border-white/20'
+                  }`}
               >
-                <Flame className="w-4 h-4 mx-auto mb-1" />
-                Today
+                <Flame className="w-5 h-5 mb-2" />
+                <span className="text-[10px] font-black uppercase tracking-tighter">Today</span>
               </button>
               <button
                 type="button"
                 onClick={() => setPriority("this_week")}
-                className={`p-3 rounded-xl border text-sm font-medium transition-all ${
-                  priority === "this_week" 
-                    ? 'bg-purple-500/15 border-purple-500/50 text-purple-400' 
-                    : 'border-[#27272a] text-zinc-400 hover:border-zinc-600'
-                }`}
+                className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all ${priority === "this_week"
+                  ? 'bg-purple/10 border-purple text-purple shadow-lg shadow-purple/10'
+                  : 'bg-white/5 border-white/5 text-muted-foreground hover:border-white/20'
+                  }`}
               >
-                <Calendar className="w-4 h-4 mx-auto mb-1" />
-                This Week
+                <Calendar className="w-5 h-5 mb-2" />
+                <span className="text-[10px] font-black uppercase tracking-tighter">Week</span>
               </button>
               <button
                 type="button"
                 onClick={() => setPriority(undefined)}
-                className={`p-3 rounded-xl border text-sm font-medium transition-all ${
-                  priority === undefined 
-                    ? 'bg-zinc-500/15 border-zinc-500/50 text-zinc-400' 
-                    : 'border-[#27272a] text-zinc-400 hover:border-zinc-600'
-                }`}
+                className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all ${priority === undefined
+                  ? 'bg-white/10 border-white/40 text-white'
+                  : 'bg-white/5 border-white/5 text-muted-foreground hover:border-white/20'
+                  }`}
               >
-                <Archive className="w-4 h-4 mx-auto mb-1" />
-                Backlog
+                <Archive className="w-5 h-5 mb-2" />
+                <span className="text-[10px] font-black uppercase tracking-tighter">Backlog</span>
               </button>
             </div>
           </div>
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-4 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-3 border border-[#27272a] rounded-xl hover:bg-[#1a1a1f] transition-colors"
+              className="flex-1 px-6 py-4 rounded-2xl border border-white/5 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:bg-white/5 transition-all"
             >
-              Cancel
+              Discard
             </button>
             <button
               type="submit"
               disabled={isSubmitting || !title.trim()}
-              className="flex-1 px-4 py-3 bg-amber-500 hover:bg-amber-400 text-black font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-[2] px-6 py-4 bg-accent hover:bg-accent-hover text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-accent/20 hover:-translate-y-0.5"
             >
-              {isSubmitting ? "Adding..." : "Add Task"}
+              {isSubmitting ? "Processing..." : "Deploy Task"}
             </button>
           </div>
         </form>
@@ -751,12 +790,16 @@ function AddTaskModal({ projects, onClose }: {
 
 function DailyLoading() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="text-center">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 flex items-center justify-center text-3xl mx-auto mb-4 animate-pulse shadow-lg shadow-amber-500/30">
-          🤖
+        <div className="relative group">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent via-orange-500 to-purple flex items-center justify-center text-3xl mx-auto mb-6 animate-shimmer shadow-2xl shadow-accent/20 border border-white/10">
+            <Sparkles className="w-8 h-8 text-white" />
+          </div>
+          <div className="absolute inset-0 w-16 h-16 rounded-2xl bg-accent blur-xl opacity-20 mx-auto animate-pulse" />
         </div>
-        <p className="text-zinc-500">Loading your tasks...</p>
+        <h2 className="text-sm font-black uppercase tracking-[0.2em] text-white/90">Curating Systems</h2>
+        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-2">Connecting to Neural Network...</p>
       </div>
     </div>
   );

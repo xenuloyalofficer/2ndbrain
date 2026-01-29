@@ -21,16 +21,16 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const statusColors: Record<string, string> = {
-  active: "bg-green-500/20 text-green-400 border-green-500/30",
-  blocked: "bg-red-500/20 text-red-400 border-red-500/30",
-  completed: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  planning: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+  active: "bg-success-muted text-success border-success/20",
+  blocked: "bg-danger-muted text-danger border-danger/20",
+  completed: "bg-purple-muted text-purple border-purple/20",
+  planning: "bg-warning-muted text-warning border-warning/20",
 };
 
 const priorityColors: Record<string, string> = {
-  high: "bg-orange-500/20 text-orange-400 border-orange-500/30",
-  medium: "bg-zinc-500/20 text-zinc-400 border-zinc-500/30",
-  low: "bg-zinc-700/20 text-zinc-500 border-zinc-700/30",
+  high: "bg-accent/10 text-accent border-accent/20",
+  medium: "bg-white/10 text-white/70 border-white/10",
+  low: "bg-white/5 text-white/40 border-white/5",
 };
 
 interface Project {
@@ -77,38 +77,45 @@ export function ProjectCard({ project }: { project: Project }) {
 
   return (
     <>
-      <Card className="bg-zinc-900 border-zinc-800">
+      <Card className="glass-card border-white/5 group overflow-hidden">
         <CardHeader
-          className="cursor-pointer"
+          className="cursor-pointer p-6"
           onClick={() => setExpanded(!expanded)}
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {expanded ? (
-                <ChevronDown className="w-5 h-5 text-zinc-400" />
-              ) : (
-                <ChevronRight className="w-5 h-5 text-zinc-400" />
-              )}
-              <CardTitle className="text-lg">{project.name}</CardTitle>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-4">
+              <div className={`p-2 rounded-xl glass transition-transform duration-300 ${expanded ? 'rotate-90' : ''}`}>
+                <ChevronRight className="w-4 h-4 text-white/50" />
+              </div>
+              <CardTitle className="text-xl font-black tracking-tight text-white/90 group-hover:text-white transition-colors">
+                {project.name}
+              </CardTitle>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className={priorityColors[project.priority]}>
+              <Badge variant="outline" className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-lg border ${priorityColors[project.priority]}`}>
                 {project.priority}
               </Badge>
-              <Badge variant="outline" className={statusColors[project.status]}>
+              <Badge variant="outline" className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-lg border ${statusColors[project.status]}`}>
                 {project.status}
               </Badge>
             </div>
           </div>
-          <div className="ml-8 mt-2">
-            <div className="flex items-center gap-3">
-              <Progress value={project.completionPercent} className="h-2 flex-1" />
-              <span className="text-sm text-zinc-400 w-12">
+          <div className="ml-12">
+            <div className="flex items-center gap-4">
+              <div className="h-1.5 flex-1 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                <Progress
+                  value={project.completionPercent}
+                  className="h-full bg-gradient-to-r from-accent to-purple transition-all duration-1000"
+                />
+              </div>
+              <span className="text-xs font-black text-white/30 tabular-nums">
                 {project.completionPercent}%
               </span>
             </div>
-            <p className="text-sm text-zinc-500 mt-1">
-              {project.doneTasks}/{project.totalTasks} tasks
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-3 flex items-center gap-2">
+              <span className="text-white/60">{project.doneTasks}</span>
+              <span className="text-white/20">/</span>
+              <span>{project.totalTasks} operations</span>
             </p>
           </div>
         </CardHeader>
@@ -177,10 +184,10 @@ function TaskItem({ task }: { task: Task }) {
   const toggleSubtask = useMutation(api.subtasks.toggle);
 
   const taskStatusColors: Record<string, string> = {
-    todo: "border-zinc-600",
-    in_progress: "border-yellow-500 bg-yellow-500/10",
-    done: "border-green-500 bg-green-500/10",
-    blocked: "border-red-500 bg-red-500/10",
+    todo: "border-white/10 bg-white/5",
+    in_progress: "border-accent/30 bg-accent/5",
+    done: "border-success/30 bg-success/5",
+    blocked: "border-danger/30 bg-danger/5",
   };
 
   const handleToggle = () => {
@@ -189,29 +196,29 @@ function TaskItem({ task }: { task: Task }) {
   };
 
   return (
-    <div className={`border rounded-lg p-3 ${taskStatusColors[task.status]}`}>
-      <div className="flex items-start gap-3">
+    <div className={`border rounded-xl p-4 transition-all hover:translate-x-1 ${taskStatusColors[task.status]}`}>
+      <div className="flex items-start gap-4">
         <Checkbox
           checked={task.status === "done"}
           onCheckedChange={handleToggle}
-          className="mt-1"
+          className="mt-1 checkmark-bounce"
         />
         <div className="flex-1">
           <div
-            className="flex items-center gap-2 cursor-pointer"
+            className="flex items-center gap-3 cursor-pointer"
             onClick={() => task.subtasks.length > 0 && setExpanded(!expanded)}
           >
-            <span className={task.status === "done" ? "line-through text-zinc-500" : ""}>
+            <span className={`font-bold transition-all ${task.status === "done" ? "line-through text-white/20" : "text-white/80"}`}>
               {task.title}
             </span>
             {task.status === "blocked" && (
-              <Badge variant="outline" className="text-xs bg-red-500/20 text-red-400">
+              <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-widest bg-danger/10 text-danger border-danger/20 px-2 py-0">
                 blocked
               </Badge>
             )}
             {task.subtasks.length > 0 && (
-              <span className="text-xs text-zinc-500">
-                ({task.doneSubtasks}/{task.totalSubtasks})
+              <span className="text-[10px] font-black text-muted-foreground uppercase tracking-tighter">
+                {task.doneSubtasks}<span className="mx-0.5">/</span>{task.totalSubtasks}
               </span>
             )}
           </div>
