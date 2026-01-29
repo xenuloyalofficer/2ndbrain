@@ -15,7 +15,9 @@ import {
   Calendar,
   ChevronDown,
   ExternalLink,
-  MoreHorizontal
+  MoreHorizontal,
+  Play,
+  Undo2
 } from "lucide-react";
 
 interface ProjectViewProps {
@@ -253,9 +255,14 @@ function ProjectTaskCard({ task }: {
   const hasSubtasks = task.totalSubtasks > 0;
   const progress = hasSubtasks ? (task.doneSubtasks / task.totalSubtasks) * 100 : 0;
   const isDone = task.status === "done";
+  const isInProgress = task.status === "in_progress";
 
   const handleComplete = () => {
     updateStatus({ id: task._id, status: "done" });
+  };
+
+  const handleUndo = () => {
+    updateStatus({ id: task._id, status: "todo" });
   };
 
   const handleStart = () => {
@@ -277,24 +284,32 @@ function ProjectTaskCard({ task }: {
       <div className="flex items-start gap-3">
         {/* Checkbox */}
         <button 
-          onClick={isDone ? undefined : handleComplete}
+          onClick={isDone ? handleUndo : handleComplete}
           className={`
             mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all shrink-0
             ${isDone 
-              ? 'bg-emerald-500 border-emerald-500' 
+              ? 'bg-emerald-500 border-emerald-500 hover:bg-emerald-600' 
               : 'border-zinc-600 hover:border-amber-500 hover:bg-amber-500/10'
             }
           `}
+          title={isDone ? "Undo - mark as not done" : "Mark as done"}
         >
           {isDone && <CheckCircle2 className="w-3 h-3 text-white" />}
         </button>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <h4 className={`font-medium ${isDone ? 'line-through text-zinc-500' : ''}`}>
               {task.title}
             </h4>
+            
+            {isInProgress && (
+              <span className="text-xs px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                In Progress
+              </span>
+            )}
             
             {task.listPriority === "today" && (
               <span className="text-xs px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400">
@@ -338,14 +353,14 @@ function ProjectTaskCard({ task }: {
             {showActions && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setShowActions(false)} />
-                <div className="absolute right-0 top-8 z-20 bg-[#1a1a1f] border border-[#27272a] rounded-xl p-1 shadow-xl min-w-[140px]">
-                  {task.status === "todo" && (
+                <div className="absolute right-0 top-8 z-20 bg-[#1a1a1f] border border-[#27272a] rounded-xl p-1 shadow-xl min-w-[160px]">
+                  {!isInProgress && (
                     <button 
-                      onClick={handleStart}
+                      onClick={() => { handleStart(); setShowActions(false); }}
                       className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-zinc-700 rounded-lg transition-colors"
                     >
-                      <Clock className="w-4 h-4 text-amber-500" />
-                      Start
+                      <Play className="w-4 h-4 text-emerald-500" />
+                      Start Working
                     </button>
                   )}
                   <button 

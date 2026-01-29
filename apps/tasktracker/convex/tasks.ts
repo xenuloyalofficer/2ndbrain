@@ -115,6 +115,11 @@ export const updateStatus = mutation({
       updates.completedAt = Date.now();
       updates.listPriority = undefined;
     }
+    
+    // If un-doing (moving back from done), clear completedAt
+    if (task.status === "done" && args.status !== "done") {
+      updates.completedAt = undefined;
+    }
 
     await ctx.db.patch(args.id, updates);
 

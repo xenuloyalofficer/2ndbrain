@@ -12,9 +12,11 @@ import {
   ChevronRight,
   Clock,
   Sparkles,
-  GripVertical,
   MoreHorizontal,
-  Archive
+  Archive,
+  Undo2,
+  Play,
+  X
 } from "lucide-react";
 
 export function DailyView() {
@@ -25,14 +27,18 @@ export function DailyView() {
   const actionLogs = useQuery(api.actionLogs.list, { limit: 8 });
   
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showPickerModal, setShowPickerModal] = useState(false);
   const [showDone, setShowDone] = useState(false);
 
   const isLoading = !todayTasks || !weekTasks || !doneTasks || !projects;
 
   if (isLoading) return <DailyLoading />;
 
-  const todayCount = todayTasks.length;
-  const todayDone = todayTasks.filter(t => t.status === "done").length;
+  // Filter out done tasks from today/week lists
+  const activeTodayTasks = todayTasks.filter(t => t.status !== "done");
+  const activeWeekTasks = weekTasks.filter(t => t.status !== "done");
+  
+  const todayCount = activeTodayTasks.length;
 
   return (
     <div className="min-h-screen pb-24">
@@ -59,25 +65,10 @@ export function DailyView() {
             </div>
 
             <div className="flex items-center gap-3">
-              {/* Today Progress Ring */}
-              <div className="relative w-12 h-12">
-                <svg className="w-12 h-12 -rotate-90">
-                  <circle 
-                    cx="24" cy="24" r="20" 
-                    className="fill-none stroke-zinc-800" 
-                    strokeWidth="4"
-                  />
-                  <circle 
-                    cx="24" cy="24" r="20" 
-                    className="fill-none stroke-amber-500" 
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                    strokeDasharray={`${(todayDone / Math.max(todayCount, 1)) * 125.6} 125.6`}
-                  />
-                </svg>
-                <span className="absolute inset-0 flex items-center justify-center text-xs font-bold">
-                  {todayDone}/{todayCount}
-                </span>
+              {/* Today Progress */}
+              <div className="text-right mr-2">
+                <div className="text-2xl font-bold text-amber-500">{todayCount}/3</div>
+                <p className="text-xs text-zinc-500">today</p>
               </div>
 
               <button 
@@ -121,13 +112,14 @@ export function DailyView() {
               </div>
 
               <div className="space-y-3">
-                {todayTasks.map((task) => (
+                {activeTodayTasks.map((task) => (
                   <TaskCard key={task._id} task={task} variant="today" />
                 ))}
                 
                 {todayCount < 3 && (
-                  <EmptySlot 
+                  <EmptySlots 
                     count={3 - todayCount} 
+                    onPick={() => setShowPickerModal(true)}
                     onAdd={() => setShowAddModal(true)} 
                   />
                 )}
@@ -142,25 +134,25 @@ export function DailyView() {
                 </div>
                 <div>
                   <h2 className="text-lg font-bold">This Week</h2>
-                  <p className="text-xs text-zinc-500">Drag to Today when ready</p>
+                  <p className="text-xs text-zinc-500">Click 🔥 to move to Today</p>
                 </div>
-                <span className="ml-auto text-sm text-zinc-500">{weekTasks.length} tasks</span>
+                <span className="ml-auto text-sm text-zinc-500">{activeWeekTasks.length} tasks</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {weekTasks.map((task) => (
+                {activeWeekTasks.map((task) => (
                   <TaskCard key={task._id} task={task} variant="week" />
                 ))}
                 
-                {weekTasks.length === 0 && (
-                  <div className="col-span-2 py-12 text-center">
+                {activeWeekTasks.length === 0 && (
+                  <div className="col-span-2 py-12 text-center bg-[#141417] border border-[#27272a] rounded-2xl">
                     <Calendar className="w-8 h-8 text-zinc-700 mx-auto mb-2" />
                     <p className="text-sm text-zinc-500">No tasks queued for this week</p>
                     <button 
                       onClick={() => setShowAddModal(true)}
                       className="mt-3 text-sm text-purple-400 hover:text-purple-300"
                     >
-                      + Add from backlog
+                      + Add a task
                     </button>
                   </div>
                 )}
@@ -184,19 +176,12 @@ export function DailyView() {
               </button>
 
               {showDone && (
-                <div className="space-y-2 pl-12">
+                <div className="space-y-2 bg-[#141417] border border-[#27272a] rounded-2xl p-4">
                   {doneTasks.map((task) => (
-                    <div 
-                      key={task._id} 
-                      className="flex items-center gap-3 py-2 text-zinc-500"
-                    >
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                      <span className="text-sm line-through">{task.title}</span>
-                      <span className="ml-auto text-xs">{task.projectName}</span>
-                    </div>
+                    <DoneTaskRow key={task._id} task={task} />
                   ))}
                   {doneTasks.length === 0 && (
-                    <p className="text-sm text-zinc-600 py-4">Nothing completed yet. Let's change that!</p>
+                    <p className="text-sm text-zinc-600 py-4 text-center">Nothing completed yet. Let&apos;s change that!</p>
                   )}
                 </div>
               )}
@@ -215,7 +200,7 @@ export function DailyView() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-zinc-500">In Queue</span>
-                  <span className="text-2xl font-bold text-purple-500">{weekTasks.length}</span>
+                  <span className="text-2xl font-bold text-purple-500">{activeWeekTasks.length}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-zinc-500">Active Projects</span>
@@ -295,6 +280,14 @@ export function DailyView() {
           onClose={() => setShowAddModal(false)} 
         />
       )}
+
+      {/* Picker Modal - pick from backlog */}
+      {showPickerModal && (
+        <TaskPickerModal
+          projects={projects}
+          onClose={() => setShowPickerModal(false)}
+        />
+      )}
     </div>
   );
 }
@@ -314,21 +307,35 @@ function TaskCard({ task, variant }: {
 }) {
   const updateStatus = useMutation(api.tasks.updateStatus);
   const setPriority = useMutation(api.tasks.setListPriority);
+  const [showMenu, setShowMenu] = useState(false);
 
   const isToday = variant === "today";
   const hasSubtasks = task.totalSubtasks > 0;
   const progress = hasSubtasks ? (task.doneSubtasks / task.totalSubtasks) * 100 : 0;
+  const isInProgress = task.status === "in_progress";
 
   const handleComplete = () => {
     updateStatus({ id: task._id, status: "done" });
   };
 
+  const handleStart = () => {
+    updateStatus({ id: task._id, status: "in_progress" });
+    setShowMenu(false);
+  };
+
   const moveToToday = () => {
     setPriority({ id: task._id, priority: "today" });
+    setShowMenu(false);
   };
 
   const moveToWeek = () => {
     setPriority({ id: task._id, priority: "this_week" });
+    setShowMenu(false);
+  };
+
+  const removeFromList = () => {
+    setPriority({ id: task._id, priority: undefined });
+    setShowMenu(false);
   };
 
   return (
@@ -337,38 +344,38 @@ function TaskCard({ task, variant }: {
         group relative bg-[#141417] border rounded-2xl p-4 
         transition-all duration-200 hover:border-[#3f3f46] hover:bg-[#1a1a1f]
         ${isToday ? 'border-amber-500/30 hover:border-amber-500/50' : 'border-[#27272a]'}
-        ${task.status === 'done' ? 'opacity-60' : ''}
+        ${isInProgress ? 'ring-1 ring-amber-500/30' : ''}
       `}
     >
-      {/* Glow effect for today items */}
-      {isToday && (
-        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-amber-500/5 to-orange-500/5 pointer-events-none" />
+      {/* In Progress indicator */}
+      {isInProgress && (
+        <div className="absolute top-2 right-2 flex items-center gap-1 text-xs text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-full">
+          <Clock className="w-3 h-3" />
+          In Progress
+        </div>
       )}
 
-      <div className="relative flex items-start gap-4">
+      <div className="flex items-start gap-4">
         {/* Checkbox */}
         <button 
           onClick={handleComplete}
           className={`
             mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all
-            ${task.status === 'done' 
-              ? 'bg-emerald-500 border-emerald-500' 
-              : isToday 
-                ? 'border-amber-500/50 hover:border-amber-500 hover:bg-amber-500/10' 
-                : 'border-zinc-600 hover:border-zinc-500 hover:bg-zinc-800'
+            ${isToday 
+              ? 'border-amber-500/50 hover:border-amber-500 hover:bg-amber-500/10' 
+              : 'border-zinc-600 hover:border-zinc-500 hover:bg-zinc-800'
             }
           `}
+          title="Mark as done"
         >
-          {task.status === 'done' && <CheckCircle2 className="w-4 h-4 text-white" />}
+          <CheckCircle2 className="w-4 h-4 opacity-0 group-hover:opacity-30" />
         </button>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <h3 className={`font-semibold ${task.status === 'done' ? 'line-through text-zinc-500' : ''}`}>
-            {task.title}
-          </h3>
+          <h3 className="font-semibold pr-20">{task.title}</h3>
           
-          <div className="flex items-center gap-3 mt-2">
+          <div className="flex items-center gap-3 mt-2 flex-wrap">
             <span className={`
               text-xs px-2 py-0.5 rounded-md
               ${isToday ? 'bg-amber-500/15 text-amber-400' : 'bg-purple-500/15 text-purple-400'}
@@ -397,48 +404,219 @@ function TaskCard({ task, variant }: {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          {!isToday && task.status !== 'done' && (
+        <div className="flex items-center gap-1">
+          {/* Quick action: Move to Today (only for week tasks) */}
+          {!isToday && (
             <button 
               onClick={moveToToday}
-              className="p-1.5 rounded-lg hover:bg-amber-500/20 text-zinc-400 hover:text-amber-400 transition-colors"
+              className="p-2 rounded-xl hover:bg-amber-500/20 text-zinc-400 hover:text-amber-400 transition-colors"
               title="Move to Today"
             >
               <Flame className="w-4 h-4" />
             </button>
           )}
-          {isToday && task.status !== 'done' && (
+          
+          {/* Quick action: Start (only if not in progress) */}
+          {!isInProgress && (
             <button 
-              onClick={moveToWeek}
-              className="p-1.5 rounded-lg hover:bg-purple-500/20 text-zinc-400 hover:text-purple-400 transition-colors"
-              title="Move to This Week"
+              onClick={handleStart}
+              className="p-2 rounded-xl hover:bg-emerald-500/20 text-zinc-400 hover:text-emerald-400 transition-colors"
+              title="Start working"
             >
-              <Calendar className="w-4 h-4" />
+              <Play className="w-4 h-4" />
             </button>
           )}
-          <button className="p-1.5 rounded-lg hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors">
-            <MoreHorizontal className="w-4 h-4" />
-          </button>
+
+          {/* More menu */}
+          <div className="relative">
+            <button 
+              onClick={() => setShowMenu(!showMenu)}
+              className="p-2 rounded-xl hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
+            >
+              <MoreHorizontal className="w-4 h-4" />
+            </button>
+
+            {showMenu && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
+                <div className="absolute right-0 top-10 z-20 bg-[#1a1a1f] border border-[#27272a] rounded-xl p-1 shadow-xl min-w-[160px]">
+                  {isToday && (
+                    <button 
+                      onClick={moveToWeek}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-zinc-700 rounded-lg transition-colors"
+                    >
+                      <Calendar className="w-4 h-4 text-purple-500" />
+                      Move to Week
+                    </button>
+                  )}
+                  <button 
+                    onClick={removeFromList}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-zinc-700 rounded-lg transition-colors text-zinc-400"
+                  >
+                    <Archive className="w-4 h-4" />
+                    Back to Backlog
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-function EmptySlot({ count, onAdd }: { count: number; onAdd: () => void }) {
+function DoneTaskRow({ task }: { 
+  task: {
+    _id: Id<"tasks">;
+    title: string;
+    projectName: string;
+  }
+}) {
+  const updateStatus = useMutation(api.tasks.updateStatus);
+  const [showUndo, setShowUndo] = useState(false);
+
+  const handleUndo = () => {
+    updateStatus({ id: task._id, status: "todo" });
+  };
+
+  return (
+    <div 
+      className="flex items-center gap-3 py-2 group"
+      onMouseEnter={() => setShowUndo(true)}
+      onMouseLeave={() => setShowUndo(false)}
+    >
+      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+      <span className="text-sm line-through text-zinc-500 flex-1">{task.title}</span>
+      <span className="text-xs text-zinc-600">{task.projectName}</span>
+      
+      {showUndo && (
+        <button 
+          onClick={handleUndo}
+          className="p-1 rounded hover:bg-zinc-700 text-zinc-500 hover:text-white transition-colors"
+          title="Undo - mark as not done"
+        >
+          <Undo2 className="w-3 h-3" />
+        </button>
+      )}
+    </div>
+  );
+}
+
+function EmptySlots({ count, onPick, onAdd }: { count: number; onPick: () => void; onAdd: () => void }) {
   return (
     <>
       {Array.from({ length: count }).map((_, i) => (
-        <button
+        <div
           key={i}
-          onClick={onAdd}
-          className="w-full p-4 border-2 border-dashed border-zinc-800 rounded-2xl text-zinc-600 hover:border-amber-500/30 hover:text-amber-500/70 hover:bg-amber-500/5 transition-all flex items-center justify-center gap-2"
+          className="w-full p-4 border-2 border-dashed border-zinc-800 rounded-2xl flex items-center justify-center gap-4"
         >
-          <Plus className="w-4 h-4" />
-          <span className="text-sm">Pick task #{(3 - count + i + 1)}</span>
-        </button>
+          <button
+            onClick={onPick}
+            className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded-xl transition-colors"
+          >
+            <Flame className="w-4 h-4" />
+            <span className="text-sm">Pick from backlog</span>
+          </button>
+          <span className="text-zinc-600">or</span>
+          <button
+            onClick={onAdd}
+            className="flex items-center gap-2 px-4 py-2 hover:bg-zinc-800 text-zinc-400 rounded-xl transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            <span className="text-sm">Create new</span>
+          </button>
+        </div>
       ))}
     </>
+  );
+}
+
+function TaskPickerModal({ projects, onClose }: {
+  projects: Array<{ _id: Id<"projects">; name: string; slug: string }>;
+  onClose: () => void;
+}) {
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const tasks = useQuery(
+    api.tasks.listByProject,
+    selectedProject ? { projectId: selectedProject as Id<"projects"> } : "skip"
+  );
+  const setPriority = useMutation(api.tasks.setListPriority);
+
+  const availableTasks = tasks?.filter(t => t.status !== "done" && !t.listPriority) || [];
+
+  const addToToday = async (taskId: Id<"tasks">) => {
+    try {
+      await setPriority({ id: taskId, priority: "today" });
+      onClose();
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Failed to add task");
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div 
+        className="relative bg-[#141417] border border-[#27272a] rounded-3xl p-6 w-full max-w-lg shadow-2xl max-h-[80vh] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold">Pick a Task for Today</h2>
+          <button onClick={onClose} className="p-2 hover:bg-zinc-800 rounded-xl">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Project selector */}
+        <div className="mb-4">
+          <label className="text-sm text-zinc-400 mb-2 block">From project</label>
+          <div className="flex flex-wrap gap-2">
+            {projects.map(p => (
+              <button
+                key={p._id}
+                onClick={() => setSelectedProject(p._id)}
+                className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                  selectedProject === p._id 
+                    ? 'bg-amber-500 text-black font-medium' 
+                    : 'bg-zinc-800 hover:bg-zinc-700'
+                }`}
+              >
+                {p.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Task list */}
+        <div className="flex-1 overflow-y-auto space-y-2">
+          {!selectedProject && (
+            <p className="text-sm text-zinc-500 text-center py-8">Select a project to see available tasks</p>
+          )}
+          
+          {selectedProject && availableTasks.length === 0 && (
+            <p className="text-sm text-zinc-500 text-center py-8">No available tasks in backlog</p>
+          )}
+
+          {availableTasks.map(task => (
+            <button
+              key={task._id}
+              onClick={() => addToToday(task._id)}
+              className="w-full flex items-center gap-3 p-3 bg-zinc-800/50 hover:bg-zinc-800 rounded-xl transition-colors text-left"
+            >
+              <Flame className="w-4 h-4 text-amber-500 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate">{task.title}</p>
+                {task.totalSubtasks > 0 && (
+                  <p className="text-xs text-zinc-500">{task.doneSubtasks}/{task.totalSubtasks} subtasks</p>
+                )}
+              </div>
+              <span className="text-xs text-zinc-500">Add to Today</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
