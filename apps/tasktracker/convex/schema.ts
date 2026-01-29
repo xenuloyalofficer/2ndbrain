@@ -32,10 +32,18 @@ export default defineSchema({
       v.literal("done"),
       v.literal("blocked")
     ),
+    // NEW: For the 3-list system
+    listPriority: v.optional(v.union(
+      v.literal("today"),
+      v.literal("this_week")
+    )),
     aiPrompt: v.optional(v.string()),
     blockedReason: v.optional(v.string()),
     order: v.number(),
-  }).index("by_project", ["projectId"]),
+    completedAt: v.optional(v.number()),
+  })
+    .index("by_project", ["projectId"])
+    .index("by_list_priority", ["listPriority"]),
 
   subtasks: defineTable({
     taskId: v.id("tasks"),

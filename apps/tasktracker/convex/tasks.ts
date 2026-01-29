@@ -32,6 +32,64 @@ export const listByProject = query({
   },
 });
 
+// Get tasks by list priority (today, this_week)
+export const listByPriority = query({
+  args: { priority: v.union(v.literal("today"), v.literal("this_week")) },
+  handler: async (ctx, args) => {
+    const tasks = await ctx.db
+      .query("tasks")
+      .withIndex("by_list_priority", (q) => q.eq("listPriority", args.priority))
+      .collect();
+
+    const tasksWithDetails = await Promise.all(
+      tasks.map(async (task) => {
+        const project = await ctx.db.get(task.projectId);
+        const subtasks = await ctx.db
+          .query("subtasks")
+          .withIndex("by_task", (q) => q.eq("taskId", task._id))
+          .collect();
+
+        return {
+          ...task,
+          projectName: project?.name || "Unknown",
+          projectSlug: project?.slug || "",
+          subtasks: subtasks.sort((a, b) => a.order - b.order),
+          totalSubtasks: subtasks.length,
+          doneSubtasks: subtasks.filter((s) => s.done).length,
+        };
+      })
+    );
+
+    return tasksWithDetails.sort((a, b) => a.order - b.order);
+  },
+});
+
+// Get recently completed tasks (this week)
+export const listDoneThisWeek = query({
+  args: {},
+  handler: async (ctx) => {
+    const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    
+    const allTasks = await ctx.db.query("tasks").collect();
+    const doneTasks = allTasks.filter(
+      (t) => t.status === "done" && t.completedAt && t.completedAt > oneWeekAgo
+    );
+
+    const tasksWithDetails = await Promise.all(
+      doneTasks.map(async (task) => {
+        const project = await ctx.db.get(task.projectId);
+        return {
+          ...task,
+          projectName: project?.name || "Unknown",
+          projectSlug: project?.slug || "",
+        };
+      })
+    );
+
+    return tasksWithDetails.sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0));
+  },
+});
+
 export const updateStatus = mutation({
   args: {
     id: v.id("tasks"),
@@ -47,12 +105,18 @@ export const updateStatus = mutation({
     const task = await ctx.db.get(args.id);
     if (!task) return;
 
-    const oldStatus = task.status;
-    
-    await ctx.db.patch(args.id, {
+    const updates: Record<string, unknown> = {
       status: args.status,
       blockedReason: args.blockedReason,
-    });
+    };
+
+    // If marking as done, record completion time and clear list priority
+    if (args.status === "done") {
+      updates.completedAt = Date.now();
+      updates.listPriority = undefined;
+    }
+
+    await ctx.db.patch(args.id, updates);
 
     // Log the action
     const statusLabels: Record<string, string> = {
@@ -86,14 +150,72 @@ export const updateStatus = mutation({
   },
 });
 
+// Set list priority (move to today/this_week)
+export const setListPriority = mutation({
+  args: {
+    id: v.id("tasks"),
+    priority: v.optional(v.union(v.literal("today"), v.literal("this_week"))),
+  },
+  handler: async (ctx, args) => {
+    const task = await ctx.db.get(args.id);
+    if (!task) return;
+
+    // Check TODAY limit (max 3)
+    if (args.priority === "today") {
+      const todayTasks = await ctx.db
+        .query("tasks")
+        .withIndex("by_list_priority", (q) => q.eq("listPriority", "today"))
+        .collect();
+      
+      // Don't count the current task if it's already in today
+      const otherTodayTasks = todayTasks.filter((t) => t._id !== args.id);
+      if (otherTodayTasks.length >= 3) {
+        throw new Error("TODAY list is full (max 3). Complete or move a task first.");
+      }
+    }
+
+    await ctx.db.patch(args.id, { listPriority: args.priority });
+
+    // Log the action
+    const project = await ctx.db.get(task.projectId);
+    const priorityLabels: Record<string, string> = {
+      today: "TODAY 🔥",
+      this_week: "THIS WEEK",
+    };
+
+    await ctx.db.insert("actionLogs", {
+      projectId: task.projectId,
+      taskId: args.id,
+      action: "prioritized",
+      description: args.priority 
+        ? `📌 "${task.title}" → ${priorityLabels[args.priority]}`
+        : `📤 "${task.title}" → Backlog`,
+      timestamp: Date.now(),
+    });
+  },
+});
+
 export const create = mutation({
   args: {
     projectId: v.id("projects"),
     title: v.string(),
     description: v.optional(v.string()),
     aiPrompt: v.optional(v.string()),
+    listPriority: v.optional(v.union(v.literal("today"), v.literal("this_week"))),
   },
   handler: async (ctx, args) => {
+    // Check TODAY limit if adding directly to today
+    if (args.listPriority === "today") {
+      const todayTasks = await ctx.db
+        .query("tasks")
+        .withIndex("by_list_priority", (q) => q.eq("listPriority", "today"))
+        .collect();
+      
+      if (todayTasks.length >= 3) {
+        throw new Error("TODAY list is full (max 3).");
+      }
+    }
+
     const existingTasks = await ctx.db
       .query("tasks")
       .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
@@ -102,7 +224,11 @@ export const create = mutation({
     const order = existingTasks.length;
 
     const taskId = await ctx.db.insert("tasks", {
-      ...args,
+      projectId: args.projectId,
+      title: args.title,
+      description: args.description,
+      aiPrompt: args.aiPrompt,
+      listPriority: args.listPriority,
       status: "todo",
       order,
     });
@@ -138,7 +264,6 @@ export const getNextTask = query({
       projects = project ? [project] : [];
     } else {
       projects = await ctx.db.query("projects").collect();
-      // Sort by priority
       const priorityOrder = { high: 0, medium: 1, low: 2 };
       projects.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
     }
@@ -189,7 +314,6 @@ export const quickAdd = mutation({
       order: existingTasks.length,
     });
 
-    // Log it
     await ctx.db.insert("actionLogs", {
       projectId: project._id,
       taskId,
@@ -199,5 +323,24 @@ export const quickAdd = mutation({
     });
 
     return taskId;
+  },
+});
+
+// Archive done tasks (clear completedAt older than a week)
+export const archiveDone = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    
+    const allTasks = await ctx.db.query("tasks").collect();
+    const oldDoneTasks = allTasks.filter(
+      (t) => t.status === "done" && t.completedAt && t.completedAt < oneWeekAgo
+    );
+
+    for (const task of oldDoneTasks) {
+      await ctx.db.patch(task._id, { completedAt: undefined });
+    }
+
+    return { archived: oldDoneTasks.length };
   },
 });
