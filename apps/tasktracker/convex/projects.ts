@@ -51,3 +51,33 @@ export const updateStatus = mutation({
     await ctx.db.patch(args.id, { status: args.status });
   },
 });
+
+export const create = mutation({
+  args: {
+    name: v.string(),
+    description: v.string(),
+    priority: v.union(v.literal("high"), v.literal("medium"), v.literal("low")),
+  },
+  handler: async (ctx, args) => {
+    const slug = args.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+    const projects = await ctx.db.query("projects").collect();
+    const order = projects.length;
+
+    const projectId = await ctx.db.insert("projects", {
+      name: args.name,
+      slug,
+      description: args.description,
+      status: "active",
+      priority: args.priority,
+      order,
+    });
+
+    await ctx.db.insert("actionLogs", {
+      action: "project_created",
+      description: `Initialized new active core: ${args.name}`,
+      timestamp: Date.now(),
+    });
+
+    return projectId;
+  },
+});

@@ -10,13 +10,16 @@ import {
   CheckCircle2,
   Plus,
   ChevronRight,
+  ChevronDown,
   Clock,
-  Sparkles,
   MoreHorizontal,
   Archive,
   Undo2,
   Play,
-  X
+  X,
+  Zap,
+  Layout,
+  Target
 } from "lucide-react";
 
 export function DailyView() {
@@ -24,105 +27,86 @@ export function DailyView() {
   const weekTasks = useQuery(api.tasks.listByPriority, { priority: "this_week" });
   const doneTasks = useQuery(api.tasks.listDoneThisWeek);
   const projects = useQuery(api.projects.list);
-  const actionLogs = useQuery(api.actionLogs.list, { limit: 8 });
+  const actionLogs = useQuery(api.actionLogs.list, { limit: 6 });
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showPickerModal, setShowPickerModal] = useState(false);
+  const [showAddProjectModal, setShowAddProjectModal] = useState(false);
   const [showDone, setShowDone] = useState(false);
 
   const isLoading = !todayTasks || !weekTasks || !doneTasks || !projects;
 
   if (isLoading) return <DailyLoading />;
 
-  // Filter out done tasks from today/week lists
   const activeTodayTasks = todayTasks.filter(t => t.status !== "done");
   const activeWeekTasks = weekTasks.filter(t => t.status !== "done");
-
   const todayCount = activeTodayTasks.length;
 
   return (
-    <div className="min-h-screen pb-24 selection:bg-accent/30">
+    <div className="min-h-screen pb-24 selection:bg-accent/30 bg-[#0f1115] text-slate-200">
       {/* Header */}
-      <header className="sticky top-0 z-50 glass border-b border-white/5 mx-4 mt-4 rounded-2xl">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-5">
-              {/* Rune Avatar */}
-              <div className="relative group">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-accent via-orange-500 to-purple flex items-center justify-center text-xl shadow-lg shadow-accent/20 transition-transform group-hover:scale-105 duration-300">
-                  <Sparkles className="w-6 h-6 text-white" />
-                </div>
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-success rounded-full border-2 border-background online-indicator" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold tracking-tight text-white/90">
-                  Rune <span className="text-accent underline decoration-accent/30 underline-offset-4">Dashboard</span>
-                </h1>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest mt-0.5">
-                  {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
-                </p>
+      <header className="border-b border-white/5 bg-[#0f1115]/95 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-8 py-5 flex items-center justify-between">
+          <div className="flex items-center gap-5">
+            <div className="logo-container">
+              <img src="/rune-small.png" alt="Rune" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white tracking-tight">Rune <span className="text-accent">Dashboard</span></h1>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none mt-1.5 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center px-4 py-2 bg-white/5 border border-white/10 rounded gap-3 h-[40px]">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">Today's Focus</span>
+              <div className="flex gap-1">
+                {[0, 1, 2].map(i => (
+                  <div key={i} className={`w-2 h-2 rounded-full ${i < todayCount ? 'bg-accent' : 'bg-white/10'}`} />
+                ))}
               </div>
             </div>
-
-            <div className="flex items-center gap-6">
-              {/* Today Progress */}
-              <div className="hidden sm:flex items-center gap-4 bg-white/5 px-4 py-2 rounded-xl border border-white/5">
-                <div className="text-right">
-                  <div className="text-sm font-bold text-accent">{todayCount}/3 tasks</div>
-                  <div className="w-20 h-1 bg-white/10 rounded-full mt-1 overflow-hidden">
-                    <div
-                      className="h-full bg-accent transition-all duration-500"
-                      style={{ width: `${(todayCount / 3) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="group flex items-center gap-2 px-5 py-2.5 bg-accent hover:bg-accent-hover text-white font-bold rounded-xl transition-all hover:shadow-[0_0_20px_rgba(249,115,22,0.4)] hover:-translate-y-0.5 active:translate-y-0"
-              >
-                <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
-                <span>New Task</span>
-              </button>
-            </div>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="btn-std px-5 bg-accent hover:bg-accent-hover text-white text-sm font-bold rounded transition-all shadow-lg shadow-accent/10 active:scale-95 gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              <span>New Task</span>
+            </button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
+      <main className="max-w-7xl mx-auto px-8 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
 
-            {/* TODAY Section */}
-            <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2.5 bg-accent/10 rounded-xl border border-accent/20">
-                  <Flame className="w-5 h-5 text-accent" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold tracking-tight text-white/90">Daily Focus</h2>
-                  <p className="text-sm text-muted-foreground">The most important 3 things</p>
-                </div>
-                <div className="ml-auto flex items-center gap-3">
-                  <span className="text-sm font-bold text-muted-foreground/50 tracking-tighter">{todayCount}<span className="mx-0.5">/</span>3</span>
-                  <div className="flex gap-1.5 p-1 bg-white/5 rounded-full border border-white/5">
-                    {[0, 1, 2].map((i) => (
-                      <div
-                        key={i}
-                        className={`w-2.5 h-2.5 rounded-full transition-all duration-500 ${i < todayCount ? 'bg-accent shadow-[0_0_8px_rgba(249,115,22,0.6)]' : 'bg-white/10'}`}
-                      />
-                    ))}
+          {/* Main Content Area */}
+          <div className="lg:col-span-8 space-y-12">
+
+            {/* START DOING / Daily Focus */}
+            <section className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-accent/10 rounded-lg">
+                    <Target className="w-4 h-4 text-accent" />
                   </div>
+                  <div>
+                    <h2 className="text-base font-bold text-white uppercase tracking-tight">Start Doing</h2>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">The most important 3 things</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-500 tracking-tighter tabular-nums">{todayCount}/3</span>
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 gap-4">
                 {activeTodayTasks.map((task) => (
                   <TaskCard key={task._id} task={task} variant="today" />
                 ))}
-
                 {todayCount < 3 && (
                   <EmptySlots
                     count={3 - todayCount}
@@ -133,132 +117,142 @@ export function DailyView() {
               </div>
             </section>
 
-            {/* THIS WEEK Section */}
-            <section className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2.5 bg-purple/10 rounded-xl border border-purple/20">
-                  <Calendar className="w-5 h-5 text-purple" />
+            {/* STOP DOING / Weekly Blockers */}
+            <section className="space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-slate-800 rounded-lg">
+                  <Calendar className="w-4 h-4 text-slate-400" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold tracking-tight text-white/90">Coming Up</h2>
-                  <p className="text-sm text-muted-foreground">Tasks for this week</p>
+                  <h2 className="text-base font-bold text-white uppercase tracking-tight">Stop Doing</h2>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Tasks queued for this week</p>
                 </div>
-                <span className="ml-auto bg-white/5 px-3 py-1 rounded-full text-xs font-bold text-muted-foreground border border-white/5">
-                  {activeWeekTasks.length} queued
-                </span>
+                <span className="ml-auto bg-white/5 border border-white/10 px-2 py-0.5 rounded text-[10px] font-bold text-slate-500">{activeWeekTasks.length} queued</span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {activeWeekTasks.map((task) => (
                   <TaskCard key={task._id} task={task} variant="week" />
                 ))}
-
                 {activeWeekTasks.length === 0 && (
-                  <div className="col-span-2 py-12 text-center bg-[#141417] border border-[#27272a] rounded-2xl">
-                    <Calendar className="w-8 h-8 text-zinc-700 mx-auto mb-2" />
-                    <p className="text-sm text-zinc-500">No tasks queued for this week</p>
-                    <button
-                      onClick={() => setShowAddModal(true)}
-                      className="mt-3 text-sm text-purple-400 hover:text-purple-300"
-                    >
-                      + Add a task
-                    </button>
+                  <div className="col-span-2 p-12 border border-dashed border-white/5 rounded-xl text-center bg-white/[0.01]">
+                    <Clock className="w-8 h-8 text-slate-700 mx-auto mb-3" />
+                    <p className="text-sm text-slate-600 font-medium">No weekly blockers identified</p>
+                    <button onClick={() => setShowAddModal(true)} className="mt-3 text-xs text-accent font-bold hover:underline">Add weekly task</button>
                   </div>
                 )}
               </div>
             </section>
 
-            {/* DONE THIS WEEK Section */}
-            <section>
+            {/* CONTINUE DOING / Recently Resolved */}
+            <section className="space-y-4">
               <button
                 onClick={() => setShowDone(!showDone)}
-                className="flex items-center gap-3 mb-4 w-full text-left"
+                className="flex items-center justify-between w-full p-4 bg-[#181b21] hover:bg-[#1e232b] border border-white/5 rounded-xl transition-all group"
               >
-                <div className="p-2 bg-emerald-500/15 rounded-xl">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                    <CheckCircle2 className="w-4 h-4" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-sm font-bold text-white tracking-tight">Continue Doing</h3>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{doneTasks.length} recently resolved</p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-lg font-bold">Done This Week</h2>
-                  <p className="text-xs text-zinc-500">{doneTasks.length} completed</p>
-                </div>
-                <ChevronRight className={`ml-auto w-5 h-5 text-zinc-500 transition-transform ${showDone ? 'rotate-90' : ''}`} />
+                <ChevronRight className={`w-4 h-4 text-slate-600 transition-transform ${showDone ? 'rotate-90' : ''}`} />
               </button>
 
               {showDone && (
-                <div className="space-y-1 glass p-5 rounded-2xl animate-in fade-in zoom-in-95 duration-300">
+                <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
                   {doneTasks.map((task) => (
                     <DoneTaskRow key={task._id} task={task} />
                   ))}
                   {doneTasks.length === 0 && (
-                    <p className="text-sm text-muted-foreground py-6 text-center italic">Nothing completed yet. Time to crush some goals! 🚀</p>
+                    <div className="p-8 text-center bg-white/[0.01] border border-dashed border-white/5 rounded-xl text-xs text-slate-600">
+                      No recently resolved units
+                    </div>
                   )}
                 </div>
               )}
             </section>
           </div>
 
-          {/* Sidebar */}
-          <aside className="space-y-6">
-            {/* Quick Stats */}
-            <div className="glass p-6 rounded-2xl animate-in fade-in slide-in-from-right-4 duration-700">
-              <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-2">
+          {/* SIDEBAR: Stats & Workspaces & Pulse */}
+          <aside className="lg:col-span-4 space-y-8">
+
+            {/* EFFICIENCY / PERFORMANCE Stats */}
+            <div className="bg-[#181b21] p-6 rounded-xl border border-white/5 overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-accent/5 blur-3xl -mr-12 -mt-12" />
+              <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
                 <div className="w-1 h-3 bg-accent rounded-full" />
-                Performance
+                Operational Status
               </h3>
-              <div className="space-y-5">
-                <div className="flex items-center justify-between group">
-                  <span className="text-sm text-muted-foreground group-hover:text-white transition-colors">Completed</span>
-                  <span className="text-xl font-black text-success tabular-nums">{doneTasks.length}</span>
+
+              <div className="space-y-6">
+                <div className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-lg">
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">Resolved Units</p>
+                    <p className="text-2xl font-bold text-white tracking-tighter">{doneTasks.length}</p>
+                  </div>
+                  <div className="w-10 h-10 rounded bg-emerald-500/10 flex items-center justify-center">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                  </div>
                 </div>
-                <div className="flex items-center justify-between group">
-                  <span className="text-sm text-muted-foreground group-hover:text-white transition-colors">In Queue</span>
-                  <span className="text-xl font-black text-purple tabular-nums">{activeWeekTasks.length}</span>
-                </div>
-                <div className="flex items-center justify-between group">
-                  <span className="text-sm text-muted-foreground group-hover:text-white transition-colors">Active Projects</span>
-                  <span className="text-xl font-black text-accent tabular-nums">
-                    {projects.filter(p => p.status === 'active').length}
-                  </span>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-white/[0.02] border border-white/5 rounded-lg">
+                    <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">Queue Size</p>
+                    <p className="text-xl font-bold text-white">{activeWeekTasks.length}</p>
+                  </div>
+                  <div className="p-4 bg-white/[0.02] border border-white/5 rounded-lg">
+                    <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">Active Core</p>
+                    <p className="text-xl font-bold text-white">{projects.filter(p => p.status === 'active').length}</p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Action Log */}
-            <div className="glass p-6 rounded-2xl animate-in fade-in slide-in-from-right-8 duration-700 delay-150">
-              <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-2">
+            {/* PULSE / Action Logs */}
+            <div className="bg-[#181b21] p-6 rounded-xl border border-white/5">
+              <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
                 <div className="w-1 h-3 bg-purple rounded-full" />
-                Pulse
+                Pulse Matrix
               </h3>
               <div className="space-y-5">
                 {actionLogs && actionLogs.length > 0 ? (
                   actionLogs.map((log) => (
-                    <div key={log._id} className="flex gap-4 group">
-                      <div className="relative flex flex-col items-center">
-                        <div className="w-2 h-2 rounded-full bg-accent group-hover:scale-125 transition-transform" />
-                        <div className="w-px flex-1 bg-white/10 my-1" />
-                      </div>
-                      <div className="pb-1">
-                        <p className="text-xs font-medium text-white/80 leading-relaxed group-hover:text-white transition-colors">{log.description}</p>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
-                          {formatTimeAgo(log.timestamp)}
-                        </p>
-                      </div>
+                    <div key={log._id} className="relative pl-6 group">
+                      <div className="absolute left-0 top-1.5 w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                      <div className="absolute left-[2.5px] top-4 w-[1px] h-[calc(100%+12px)] bg-white/5 last:hidden" />
+                      <p className="text-xs font-medium text-slate-400 leading-relaxed group-hover:text-slate-200 transition-colors">{log.description}</p>
+                      <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest mt-1.5">
+                        {formatTimeAgo(log.timestamp)}
+                      </p>
                     </div>
                   ))
                 ) : (
-                  <p className="text-xs text-muted-foreground italic">Silence is golden...</p>
+                  <p className="text-xs text-slate-700 italic text-center py-6">Static detected...</p>
                 )}
               </div>
             </div>
 
-            {/* Projects Quick Access */}
-            <div className="glass p-6 rounded-2xl animate-in fade-in slide-in-from-right-12 duration-700 delay-300">
-              <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-2">
-                <div className="w-1 h-3 bg-success rounded-full" />
-                Workspaces
-              </h3>
-              <div className="space-y-3">
-                {projects.slice(0, 5).map((project) => (
+            {/* WORKSPACES / Projects */}
+            <div className="bg-[#181b21] p-6 rounded-xl border border-white/5">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                  <div className="w-1 h-3 bg-emerald-500 rounded-full" />
+                  Active Cores
+                </h3>
+                <button
+                  onClick={() => setShowAddProjectModal(true)}
+                  className="p-1.5 rounded bg-white/5 hover:bg-white/10 text-slate-500 hover:text-white transition-all shadow-sm"
+                  title="Initialize New Core"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <div className="space-y-2">
+                {projects.map((project) => (
                   <button
                     key={project._id}
                     onClick={() => {
@@ -266,46 +260,30 @@ export function DailyView() {
                         (window as any).__tasktracker.openProject(project._id);
                       }
                     }}
-                    className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 transition-all group text-left border border-transparent hover:border-white/5"
+                    className="w-full group p-3 rounded hover:bg-white/5 transition-all text-left border border-transparent hover:border-white/5"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center text-sm font-black text-white/50 group-hover:text-accent group-hover:bg-accent/10 group-hover:scale-110 transition-all duration-300">
-                      {project.name.charAt(0)}
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-slate-300 group-hover:text-accent transition-colors truncate block flex-1">{project.name}</span>
+                      <span className="text-[10px] font-bold text-slate-600 tabular-nums">{project.completionPercent}%</span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold truncate text-white/90 group-hover:text-white transition-colors">{project.name}</p>
-                      <div className="flex items-center gap-3 mt-1.5">
-                        <div className="flex-1 h-1 bg-white/5 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-gradient-to-r from-accent to-success rounded-full transition-all duration-1000"
-                            style={{ width: `${project.completionPercent}%` }}
-                          />
-                        </div>
-                        <span className="text-[10px] font-black text-muted-foreground">{project.completionPercent}%</span>
-                      </div>
+                    <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-accent transition-all duration-1000 group-hover:bg-accent-hover"
+                        style={{ width: `${project.completionPercent}%` }}
+                      />
                     </div>
                   </button>
                 ))}
               </div>
             </div>
+
           </aside>
         </div>
       </main>
 
-      {/* Add Modal */}
-      {showAddModal && (
-        <AddTaskModal
-          projects={projects}
-          onClose={() => setShowAddModal(false)}
-        />
-      )}
-
-      {/* Picker Modal - pick from backlog */}
-      {showPickerModal && (
-        <TaskPickerModal
-          projects={projects}
-          onClose={() => setShowPickerModal(false)}
-        />
-      )}
+      {/* Modals */}
+      {showAddModal && <AddTaskModal projects={projects!} onClose={() => setShowAddModal(false)} />}
+      {showPickerModal && <TaskPickerModal projects={projects!} onClose={() => setShowPickerModal(false)} />}
     </div>
   );
 }
@@ -319,7 +297,6 @@ function TaskCard({ task, variant }: {
     projectSlug: string;
     totalSubtasks: number;
     doneSubtasks: number;
-    blockedReason?: string;
   };
   variant: "today" | "week"
 }) {
@@ -328,199 +305,87 @@ function TaskCard({ task, variant }: {
   const [showMenu, setShowMenu] = useState(false);
 
   const isToday = variant === "today";
-  const hasSubtasks = task.totalSubtasks > 0;
-  const progress = hasSubtasks ? (task.doneSubtasks / task.totalSubtasks) * 100 : 0;
   const isInProgress = task.status === "in_progress";
-
-  const handleComplete = () => {
-    updateStatus({ id: task._id, status: "done" });
-  };
-
-  const handleStart = () => {
-    updateStatus({ id: task._id, status: "in_progress" });
-    setShowMenu(false);
-  };
-
-  const moveToToday = () => {
-    setPriority({ id: task._id, priority: "today" });
-    setShowMenu(false);
-  };
-
-  const moveToWeek = () => {
-    setPriority({ id: task._id, priority: "this_week" });
-    setShowMenu(false);
-  };
-
-  const removeFromList = () => {
-    setPriority({ id: task._id, priority: undefined });
-    setShowMenu(false);
-  };
+  const hasSubtasks = task.totalSubtasks > 0;
+  const progressPercent = hasSubtasks ? (task.doneSubtasks / task.totalSubtasks) * 100 : 0;
 
   return (
-    <div
-      className={`
-        group relative glass-card p-5 rounded-2xl
-        ${isToday ? 'border-accent/20 bg-accent/5' : ''}
-        ${isInProgress ? 'ring-1 ring-accent/30 shadow-[0_0_20px_rgba(249,115,22,0.1)]' : ''}
-      `}
-    >
-      {/* In Progress indicator */}
-      {isInProgress && (
-        <div className="absolute top-3 right-3 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-accent bg-accent/10 px-2 py-1 rounded-full border border-accent/20">
-          <Clock className="w-3 h-3" />
-          Live
-        </div>
-      )}
-
-      <div className="flex items-start gap-4">
+    <div className={`p-5 rounded-lg group bg-[#181b21] border transition-all duration-300 ${isInProgress ? 'border-accent/40 bg-accent/[0.04] ring-1 ring-accent/10' : 'border-white/5 hover:border-white/10'}`}>
+      <div className="flex items-center gap-4">
         {/* Checkbox */}
         <button
-          onClick={handleComplete}
-          className={`
-            mt-1 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all checkmark-bounce
-            ${isToday
-              ? 'border-accent/40 hover:border-accent hover:bg-accent/20'
-              : 'border-white/20 hover:border-white/40 hover:bg-white/5'
-            }
-          `}
-          title="Mark as done"
+          onClick={() => updateStatus({ id: task._id, status: "done" })}
+          className={`h-6 w-6 rounded border-2 flex items-center justify-center transition-all checkmark-bounce shrink-0 ${isInProgress ? 'border-accent/40 bg-accent/10 hover:bg-accent' : 'border-slate-700 hover:border-accent bg-white/5'}`}
         >
           <CheckCircle2 className="w-4 h-4 opacity-0 group-hover:opacity-40" />
         </button>
 
-        {/* Content */}
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-white/90 pr-12 leading-snug group-hover:text-white transition-colors">
-            {task.title}
-          </h3>
-
-          <div className="flex items-center gap-3 mt-3 flex-wrap">
-            <span className={`
-              text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border
-              ${isToday
-                ? 'bg-accent/10 text-accent border-accent/20'
-                : 'bg-purple/10 text-purple border-purple/20'
-              }
-            `}>
+          <div className="flex items-center gap-3 mb-2 flex-wrap">
+            <span className="text-[10px] font-bold text-accent bg-accent/10 px-2 py-0.5 rounded border border-accent/20 uppercase tracking-widest leading-none">
               {task.projectName}
             </span>
-
-            {hasSubtasks && (
-              <div className="flex items-center gap-2">
-                <div className="w-16 h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
-                  <div
-                    className="h-full bg-gradient-to-r from-accent to-purple rounded-full transition-all duration-500"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-                <span className="text-[10px] font-bold text-muted-foreground">{task.doneSubtasks}/{task.totalSubtasks}</span>
-              </div>
-            )}
-
-            {task.blockedReason && (
-              <span className="text-xs text-red-400 flex items-center gap-1">
-                🔴 Blocked
+            {isInProgress && (
+              <span className="text-[10px] font-bold text-accent uppercase tracking-widest flex items-center gap-1.5 animate-pulse">
+                <Clock className="w-3 h-3" />
+                Active
               </span>
             )}
           </div>
+          <h3 className={`text-sm font-medium leading-relaxed transition-colors ${isInProgress ? 'text-white' : 'text-slate-200 group-hover:text-white'}`}>
+            {task.title}
+          </h3>
+
+          {hasSubtasks && (
+            <div className="mt-4 flex flex-col gap-1.5">
+              <div className="flex justify-between items-center px-0.5">
+                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Resolution Progress</span>
+                <span className="text-[9px] font-bold text-slate-500 tabular-nums">{task.doneSubtasks}/{task.totalSubtasks}</span>
+              </div>
+              <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                <div className="h-full bg-accent transition-all duration-700" style={{ width: `${progressPercent}%` }} />
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-1">
-          {/* Quick action: Move to Today (only for week tasks) */}
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all ml-4">
           {!isToday && (
             <button
-              onClick={moveToToday}
-              className="p-2 rounded-xl hover:bg-amber-500/20 text-zinc-400 hover:text-amber-400 transition-colors"
-              title="Move to Today"
+              onClick={() => setPriority({ id: task._id, priority: "today" })}
+              className="p-2 rounded hover:bg-accent/10 text-slate-500 hover:text-accent transition-colors"
+              title="Prioritize Today"
             >
               <Flame className="w-4 h-4" />
             </button>
           )}
-
-          {/* Quick action: Start (only if not in progress) */}
           {!isInProgress && (
             <button
-              onClick={handleStart}
-              className="p-2 rounded-xl hover:bg-emerald-500/20 text-zinc-400 hover:text-emerald-400 transition-colors"
-              title="Start working"
+              onClick={() => updateStatus({ id: task._id, status: "in_progress" })}
+              className="p-2 rounded hover:bg-accent/10 text-slate-500 hover:text-accent transition-colors"
+              title="Initialize Resolution"
             >
               <Play className="w-4 h-4" />
             </button>
           )}
-
-          {/* More menu */}
           <div className="relative">
-            <button
-              onClick={() => setShowMenu(!showMenu)}
-              className="p-2 rounded-xl hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
-            >
+            <button onClick={() => setShowMenu(!showMenu)} className="p-2 rounded hover:bg-white/10 text-slate-500">
               <MoreHorizontal className="w-4 h-4" />
             </button>
-
             {showMenu && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-                <div className="absolute right-0 top-12 z-20 glass rounded-xl p-1.5 shadow-2xl min-w-[180px] animate-in fade-in zoom-in-95 duration-200">
-                  {isToday && (
-                    <button
-                      onClick={moveToWeek}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-purple hover:bg-purple/10 rounded-lg transition-colors"
-                    >
-                      <Calendar className="w-4 h-4" />
-                      Move to Week
-                    </button>
-                  )}
-                  <button
-                    onClick={removeFromList}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:bg-white/5 rounded-lg transition-colors"
-                  >
-                    <Archive className="w-4 h-4" />
-                    Archive
-                  </button>
-                </div>
-              </>
+              <div className="absolute right-0 top-full mt-2 z-50 bg-[#1e232b] border border-white/10 rounded-lg shadow-2xl min-w-[160px] p-1 animate-in fade-in zoom-in-95">
+                <button
+                  onClick={() => { setPriority({ id: task._id, priority: undefined }); setShowMenu(false); }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[10px] font-bold uppercase text-slate-400 hover:bg-white/5 hover:text-white rounded transition-colors"
+                >
+                  <Archive className="w-3.5 h-3.5" />
+                  Return to Backlog
+                </button>
+              </div>
             )}
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-function DoneTaskRow({ task }: {
-  task: {
-    _id: Id<"tasks">;
-    title: string;
-    projectName: string;
-  }
-}) {
-  const updateStatus = useMutation(api.tasks.updateStatus);
-  const [showUndo, setShowUndo] = useState(false);
-
-  const handleUndo = () => {
-    updateStatus({ id: task._id, status: "todo" });
-  };
-
-  return (
-    <div
-      className="flex items-center gap-3 py-2 group"
-      onMouseEnter={() => setShowUndo(true)}
-      onMouseLeave={() => setShowUndo(false)}
-    >
-      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-      <span className="text-sm line-through text-zinc-500 flex-1">{task.title}</span>
-      <span className="text-xs text-zinc-600">{task.projectName}</span>
-
-      {showUndo && (
-        <button
-          onClick={handleUndo}
-          className="p-1 rounded hover:bg-zinc-700 text-zinc-500 hover:text-white transition-colors"
-          title="Undo - mark as not done"
-        >
-          <Undo2 className="w-3 h-3" />
-        </button>
-      )}
     </div>
   );
 }
@@ -529,258 +394,243 @@ function EmptySlots({ count, onPick, onAdd }: { count: number; onPick: () => voi
   return (
     <>
       {Array.from({ length: count }).map((_, i) => (
-        <div
-          key={i}
-          className="w-full p-6 border-2 border-dashed border-white/5 rounded-2xl flex items-center justify-center gap-6 group hover:border-accent/30 hover:bg-accent/5 transition-all cursor-pointer"
-        >
-          <button
-            onClick={onPick}
-            className="flex items-center gap-2.5 px-5 py-2.5 bg-accent/10 group-hover:bg-accent text-accent group-hover:text-white rounded-xl transition-all font-bold text-sm"
-          >
-            <Flame className="w-4 h-4" />
-            Pick from backlog
-          </button>
-          <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground/30 group-hover:text-accent/30">Or</span>
-          <button
-            onClick={onAdd}
-            className="flex items-center gap-2.5 px-5 py-2.5 hover:bg-white/5 text-muted-foreground hover:text-white rounded-xl transition-all font-bold text-sm"
-          >
-            <Plus className="w-4 h-4" />
-            Create new
-          </button>
+        <div key={i} className="p-8 rounded-lg border border-dashed border-white/5 flex flex-col items-center justify-center gap-4 group hover:bg-white/[0.01] hover:border-white/10 transition-all">
+          <div className="text-center">
+            <p className="text-[10px] font-bold text-slate-700 uppercase tracking-[0.2em] group-hover:text-slate-500 transition-colors">Mission Slot Available</p>
+            <p className="text-[9px] font-bold text-slate-800 uppercase tracking-widest mt-1">Standby for deployment</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onPick}
+              className="btn-std px-5 bg-accent/5 hover:bg-accent text-accent hover:text-white rounded border border-accent/20 hover:border-accent text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95"
+            >
+              Pick from backlog
+            </button>
+            <button
+              onClick={onAdd}
+              className="btn-std px-5 hover:bg-white/5 text-slate-500 hover:text-white rounded text-[10px] font-bold uppercase tracking-widest transition-all"
+            >
+              New Unit
+            </button>
+          </div>
         </div>
       ))}
     </>
   );
 }
 
-function TaskPickerModal({ projects, onClose }: {
-  projects: Array<{ _id: Id<"projects">; name: string; slug: string }>;
-  onClose: () => void;
-}) {
-  const [selectedProject, setSelectedProject] = useState<string | null>(null);
-  const tasks = useQuery(
-    api.tasks.listByProject,
-    selectedProject ? { projectId: selectedProject as Id<"projects"> } : "skip"
+function DoneTaskRow({ task }: { task: { _id: Id<"tasks">; title: string; projectName: string } }) {
+  const updateStatus = useMutation(api.tasks.updateStatus);
+  return (
+    <div className="flex items-center gap-4 p-4 rounded-lg bg-white/[0.01] border border-white/5 group hover:bg-white/[0.02] transition-all">
+      <div className="w-5 h-5 rounded bg-emerald-500/10 flex items-center justify-center text-emerald-500/40">
+        <CheckCircle2 className="w-3 h-3" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <span className="text-xs text-slate-500 uppercase font-bold tracking-widest block mb-0.5 opacity-50">{task.projectName}</span>
+        <span className="text-sm text-slate-500 line-through truncate block">{task.title}</span>
+      </div>
+      <button
+        onClick={() => updateStatus({ id: task._id, status: "todo" })}
+        className="opacity-0 group-hover:opacity-100 p-2 hover:bg-white/5 rounded-lg text-slate-500 hover:text-white transition-all"
+        title="Undo"
+      >
+        <Undo2 className="w-3.5 h-3.5" />
+      </button>
+    </div>
   );
+}
+
+function TaskPickerModal({ projects, onClose }: { projects: any[]; onClose: () => void }) {
+  const [selectedProjectId, setSelectedProjectId] = useState<Id<"projects"> | null>(projects[0]?._id);
+  const tasks = useQuery(api.tasks.listByProject, selectedProjectId ? { projectId: selectedProjectId } : "skip");
   const setPriority = useMutation(api.tasks.setListPriority);
 
   const availableTasks = tasks?.filter(t => t.status !== "done" && !t.listPriority) || [];
 
-  const addToToday = async (taskId: Id<"tasks">) => {
-    try {
-      await setPriority({ id: taskId, priority: "today" });
-      onClose();
-    } catch (error) {
-      alert(error instanceof Error ? error.message : "Failed to add task");
-    }
-  };
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300" onClick={onClose}>
-      <div className="absolute inset-0 bg-background/80 backdrop-blur-md" />
-      <div
-        className="relative glass rounded-3xl p-8 w-full max-w-lg shadow-2xl max-h-[85vh] flex flex-col border-white/10 animate-in zoom-in-95 slide-in-from-bottom-10 duration-500"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
+      <div className="absolute inset-0" onClick={onClose} />
+      <div className="relative bg-[#181b21] border border-white/10 rounded-xl p-8 w-full max-w-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col max-h-[85vh] animate-in zoom-in-95 slide-in-from-bottom-5 duration-500">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl font-black tracking-tight text-white/90">Curate Focus</h2>
-            <p className="text-sm text-muted-foreground mt-1">Select a task from your backlog</p>
+            <h2 className="text-xl font-bold text-white tracking-tight">Pick from backlog</h2>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Select objective for immediate deployment</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-xl transition-colors">
-            <X className="w-5 h-5 text-muted-foreground" />
-          </button>
+          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded transition-colors"><X className="w-5 h-5 text-slate-500" /></button>
         </div>
 
-        {/* Project selector */}
-        <div className="mb-8">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4 block">Source Project</label>
-          <div className="flex flex-wrap gap-2.5">
-            {projects.map(p => (
-              <button
-                key={p._id}
-                onClick={() => setSelectedProject(p._id)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${selectedProject === p._id
-                  ? 'bg-accent border-accent text-white shadow-lg shadow-accent/20'
-                  : 'bg-white/5 border-white/5 text-muted-foreground hover:border-white/20'
-                  }`}
-              >
-                {p.name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Task list */}
-        <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
-          {!selectedProject && (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-4">
-                <ChevronRight className="w-6 h-6 text-muted-foreground/30 rotate-90" />
-              </div>
-              <p className="text-sm font-bold text-muted-foreground/50 italic tracking-tight">Select a workspace above</p>
-            </div>
-          )}
-
-          {selectedProject && availableTasks.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <CheckCircle2 className="w-10 h-10 text-success/30 mb-4" />
-              <p className="text-sm font-bold text-muted-foreground/50 italic tracking-tight">Project backlog is empty</p>
-            </div>
-          )}
-
-          {availableTasks.map(task => (
+        <div className="flex flex-wrap gap-2 mb-8 shrink-0 min-h-[50px] items-center">
+          {projects.map(p => (
             <button
-              key={task._id}
-              onClick={() => addToToday(task._id)}
-              className="w-full flex items-center gap-4 p-4 glass-card rounded-2xl transition-all text-left group"
+              key={p._id}
+              onClick={() => setSelectedProjectId(p._id)}
+              className={`h-9 px-4 rounded text-[10px] font-bold uppercase tracking-widest whitespace-nowrap border transition-all flex items-center justify-center ${selectedProjectId === p._id ? 'bg-accent border-accent text-white shadow-lg shadow-accent/20' : 'bg-white/5 border-white/5 text-slate-500 hover:border-white/10'}`}
             >
-              <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center group-hover:bg-accent group-hover:text-white transition-all">
-                <Flame className="w-5 h-5 text-accent group-hover:text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-white/90 truncate group-hover:text-white">{task.title}</p>
-                {task.totalSubtasks > 0 && (
-                  <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground mt-1 group-hover:text-white/50">{task.doneSubtasks}/{task.totalSubtasks} steps</p>
-                )}
-              </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-accent opacity-0 group-hover:opacity-100 transition-opacity">Add</span>
+              {p.name}
             </button>
           ))}
+        </div>
+
+        <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+          {availableTasks.map(t => (
+            <button
+              key={t._id}
+              onClick={() => { setPriority({ id: t._id, priority: "today" }); onClose(); }}
+              className="w-full text-left p-5 rounded-lg bg-white/[0.02] border border-white/5 hover:border-accent/40 hover:bg-white/[0.04] transition-all group flex items-center justify-between"
+            >
+              <div>
+                <p className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">{t.title}</p>
+                {t.totalSubtasks > 0 && (
+                  <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest mt-1.5">{t.doneSubtasks}/{t.totalSubtasks} steps defined</p>
+                )}
+              </div>
+              <ChevronRight className="w-4 h-4 text-slate-800 group-hover:text-accent transition-colors" />
+            </button>
+          ))}
+          {availableTasks.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-20 text-center text-slate-700">
+              <Archive className="w-10 h-10 mb-4 opacity-10" />
+              <p className="text-xs font-bold uppercase tracking-widest italic font-medium">Terminal Backlog Clear</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-function AddTaskModal({ projects, onClose }: {
-  projects: Array<{ _id: Id<"projects">; name: string; slug: string }>;
-  onClose: () => void
-}) {
-  const createTask = useMutation(api.tasks.create);
-  const [title, setTitle] = useState("");
-  const [projectId, setProjectId] = useState(projects[0]?._id || "");
-  const [priority, setPriority] = useState<"today" | "this_week" | undefined>("this_week");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+function AddProjectModal({ onClose }: { onClose: () => void }) {
+  const createProject = useMutation(api.projects.create);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [priority, setPriority] = useState<"high" | "medium" | "low">("medium");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !projectId) return;
-
-    setIsSubmitting(true);
-    try {
-      await createTask({
-        projectId: projectId as Id<"projects">,
-        title: title.trim(),
-        listPriority: priority,
-      });
-      onClose();
-    } catch (error) {
-      console.error("Failed to create task:", error);
-      alert(error instanceof Error ? error.message : "Failed to create task");
-    } finally {
-      setIsSubmitting(false);
-    }
+    if (!name.trim()) return;
+    await createProject({ name: name.trim(), description: description.trim(), priority });
+    onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300" onClick={onClose}>
-      <div className="absolute inset-0 bg-background/80 backdrop-blur-md" />
-      <div
-        className="relative glass rounded-3xl p-8 w-full max-w-md shadow-2xl border-white/10 animate-in zoom-in-95 slide-in-from-bottom-10 duration-500"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-2xl font-black tracking-tight text-white/90">Initialize Task</h2>
-            <p className="text-sm text-muted-foreground mt-1">What's the mission today?</p>
-          </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-xl transition-colors">
-            <X className="w-5 h-5 text-muted-foreground" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-8">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
+      <div className="absolute inset-0" onClick={onClose} />
+      <div className="relative bg-[#181b21] border border-white/10 rounded-xl p-10 w-full max-w-md shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-5 duration-500">
+        <h2 className="text-lg font-bold text-white tracking-tight mb-8">Initialize Active Core</h2>
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block px-1">Concept</label>
+            <label className="text-[10px] font-bold text-slate-600 uppercase tracking-widest px-1">Core Identity</label>
             <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter task description..."
-              className="w-full bg-white/5 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder:text-white/20 focus:outline-none focus:border-accent/40 focus:bg-white/[0.08] transition-all font-medium"
               autoFocus
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-5 py-4 text-white text-sm focus:outline-none focus:border-accent transition-all placeholder:text-slate-800 font-medium"
+              placeholder="e.g., Project X"
+              value={name}
+              onChange={e => setName(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-slate-600 uppercase tracking-widest px-1">Mission Parameters</label>
+            <textarea
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-5 py-4 text-white text-sm focus:outline-none focus:border-accent transition-all placeholder:text-slate-800 font-medium min-h-[100px] resize-none"
+              placeholder="Operational description..."
+              value={description}
+              onChange={e => setDescription(e.target.value)}
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block px-1">Workspace</label>
-            <select
-              value={projectId as string}
-              onChange={(e) => setProjectId(e.target.value as Id<"projects">)}
-              className="w-full bg-white/5 border border-white/5 rounded-2xl px-5 py-4 text-white appearance-none focus:outline-none focus:border-accent/40 focus:bg-white/[0.08] transition-all font-medium cursor-pointer"
-            >
-              {projects.map(p => (
-                <option key={p._id} value={p._id} className="bg-background text-white">{p.name}</option>
+            <label className="text-[10px] font-bold text-slate-600 uppercase tracking-widest px-1">Strategic Weight</label>
+            <div className="grid grid-cols-3 gap-2">
+              {(["low", "medium", "high"] as const).map(p => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setPriority(p)}
+                  className={`py-3 rounded text-[10px] font-bold uppercase tracking-widest border transition-all ${priority === p ? 'bg-accent/10 border-accent text-accent shadow-lg shadow-accent/5' : 'bg-white/5 border-white/5 text-slate-500'}`}
+                >
+                  {p}
+                </button>
               ))}
-            </select>
+            </div>
+          </div>
+
+          <div className="flex gap-4 pt-4">
+            <button type="button" onClick={onClose} className="btn-std flex-1 text-[10px] font-bold uppercase tracking-widest text-slate-600 hover:text-white transition-colors">Abort</button>
+            <button className="btn-std flex-1 bg-accent hover:bg-accent-hover text-white rounded text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-accent/20 transition-all active:scale-95">Initialize Core</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function AddTaskModal({ projects, onClose }: { projects: any[]; onClose: () => void }) {
+  const createTask = useMutation(api.tasks.create);
+  const [title, setTitle] = useState("");
+  const [projectId, setProjectId] = useState(projects[0]?._id);
+  const [priority, setPriority] = useState<"today" | "this_week" | undefined>("today");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !projectId) return;
+    await createTask({ projectId, title: title.trim(), listPriority: priority });
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
+      <div className="absolute inset-0" onClick={onClose} />
+      <div className="relative bg-[#181b21] border border-white/10 rounded-xl p-10 w-full max-w-md shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-5 duration-500">
+        <h2 className="text-lg font-bold text-white tracking-tight mb-8">Initialize Mission Unit</h2>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Objective Concept</label>
+            <input
+              autoFocus
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-5 py-4 text-white text-sm focus:outline-none focus:border-accent transition-all placeholder:text-slate-800 font-medium"
+              placeholder="Enter brief description..."
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Operational Core</label>
+            <div className="relative">
+              <select
+                className="w-full appearance-none bg-white/5 border border-white/10 rounded-lg px-5 py-4 text-white text-sm focus:outline-none focus:border-accent transition-all cursor-pointer font-medium"
+                value={projectId}
+                onChange={e => setProjectId(e.target.value as Id<"projects">)}
+              >
+                {projects.map(p => <option key={p._id} value={p._id} className="bg-[#181b21]">{p.name}</option>)}
+              </select>
+              <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600 pointer-events-none" />
+            </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block px-1">Priority Pipeline</label>
-            <div className="grid grid-cols-3 gap-3">
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Pipeline Priority</label>
+            <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setPriority("today")}
-                className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all ${priority === "today"
-                  ? 'bg-accent/10 border-accent text-accent shadow-lg shadow-accent/10'
-                  : 'bg-white/5 border-white/5 text-muted-foreground hover:border-white/20'
-                  }`}
+                className={`py-3 rounded text-[10px] font-bold uppercase tracking-widest border transition-all ${priority === "today" ? 'bg-accent/10 border-accent text-accent shadow-lg shadow-accent/5' : 'bg-white/5 border-white/5 text-slate-500'}`}
               >
-                <Flame className="w-5 h-5 mb-2" />
-                <span className="text-[10px] font-black uppercase tracking-tighter">Today</span>
+                Immediate
               </button>
               <button
                 type="button"
                 onClick={() => setPriority("this_week")}
-                className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all ${priority === "this_week"
-                  ? 'bg-purple/10 border-purple text-purple shadow-lg shadow-purple/10'
-                  : 'bg-white/5 border-white/5 text-muted-foreground hover:border-white/20'
-                  }`}
+                className={`py-3 rounded text-[10px] font-bold uppercase tracking-widest border transition-all ${priority === "this_week" ? 'bg-purple/10 border-purple text-purple shadow-lg shadow-purple/5' : 'bg-white/5 border-white/5 text-slate-500'}`}
               >
-                <Calendar className="w-5 h-5 mb-2" />
-                <span className="text-[10px] font-black uppercase tracking-tighter">Week</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setPriority(undefined)}
-                className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all ${priority === undefined
-                  ? 'bg-white/10 border-white/40 text-white'
-                  : 'bg-white/5 border-white/5 text-muted-foreground hover:border-white/20'
-                  }`}
-              >
-                <Archive className="w-5 h-5 mb-2" />
-                <span className="text-[10px] font-black uppercase tracking-tighter">Backlog</span>
+                Deferred
               </button>
             </div>
           </div>
 
           <div className="flex gap-4 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-6 py-4 rounded-2xl border border-white/5 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:bg-white/5 transition-all"
-            >
-              Discard
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting || !title.trim()}
-              className="flex-[2] px-6 py-4 bg-accent hover:bg-accent-hover text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-accent/20 hover:-translate-y-0.5"
-            >
-              {isSubmitting ? "Processing..." : "Deploy Task"}
-            </button>
+            <button type="button" onClick={onClose} className="btn-std flex-1 text-[10px] font-bold uppercase tracking-widest text-slate-600 hover:text-white transition-colors">Discard</button>
+            <button className="btn-std flex-1 bg-accent hover:bg-accent-hover text-white rounded text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-accent/20 transition-all active:scale-95">Deploy Unit</button>
           </div>
         </form>
       </div>
@@ -790,16 +640,10 @@ function AddTaskModal({ projects, onClose }: {
 
 function DailyLoading() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <div className="relative group">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent via-orange-500 to-purple flex items-center justify-center text-3xl mx-auto mb-6 animate-shimmer shadow-2xl shadow-accent/20 border border-white/10">
-            <Sparkles className="w-8 h-8 text-white" />
-          </div>
-          <div className="absolute inset-0 w-16 h-16 rounded-2xl bg-accent blur-xl opacity-20 mx-auto animate-pulse" />
-        </div>
-        <h2 className="text-sm font-black uppercase tracking-[0.2em] text-white/90">Curating Systems</h2>
-        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-2">Connecting to Neural Network...</p>
+    <div className="min-h-screen flex items-center justify-center bg-[#0f1115]">
+      <div className="flex flex-col items-center gap-6">
+        <div className="w-10 h-10 rounded border-2 border-accent border-t-transparent animate-spin" />
+        <p className="text-[10px] font-bold text-slate-700 uppercase tracking-[0.2em] animate-pulse">Establishing Neural Link</p>
       </div>
     </div>
   );
