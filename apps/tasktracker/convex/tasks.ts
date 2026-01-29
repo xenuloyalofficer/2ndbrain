@@ -44,9 +44,44 @@ export const updateStatus = mutation({
     blockedReason: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const task = await ctx.db.get(args.id);
+    if (!task) return;
+
+    const oldStatus = task.status;
+    
     await ctx.db.patch(args.id, {
       status: args.status,
       blockedReason: args.blockedReason,
+    });
+
+    // Log the action
+    const statusLabels: Record<string, string> = {
+      todo: "To Do",
+      in_progress: "In Progress",
+      done: "Done",
+      blocked: "Blocked",
+    };
+
+    let action = "updated";
+    let description = `"${task.title}" → ${statusLabels[args.status]}`;
+
+    if (args.status === "done") {
+      action = "completed";
+      description = `✅ Completed "${task.title}"`;
+    } else if (args.status === "in_progress") {
+      action = "started";
+      description = `▶️ Started "${task.title}"`;
+    } else if (args.status === "blocked") {
+      action = "blocked";
+      description = `🔴 Blocked "${task.title}"${args.blockedReason ? `: ${args.blockedReason}` : ""}`;
+    }
+
+    await ctx.db.insert("actionLogs", {
+      projectId: task.projectId,
+      taskId: args.id,
+      action,
+      description,
+      timestamp: Date.now(),
     });
   },
 });
@@ -66,11 +101,26 @@ export const create = mutation({
 
     const order = existingTasks.length;
 
-    return await ctx.db.insert("tasks", {
+    const taskId = await ctx.db.insert("tasks", {
       ...args,
       status: "todo",
       order,
     });
+
+    // Get project name for the log
+    const project = await ctx.db.get(args.projectId);
+    const projectName = project?.name || "Unknown";
+
+    // Log the action
+    await ctx.db.insert("actionLogs", {
+      projectId: args.projectId,
+      taskId,
+      action: "created",
+      description: `➕ Added "${args.title}" to ${projectName}`,
+      timestamp: Date.now(),
+    });
+
+    return taskId;
   },
 });
 
@@ -111,5 +161,43 @@ export const getNextTask = query({
     }
 
     return null;
+  },
+});
+
+export const quickAdd = mutation({
+  args: {
+    projectSlug: v.string(),
+    title: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const project = await ctx.db
+      .query("projects")
+      .withIndex("by_slug", (q) => q.eq("slug", args.projectSlug))
+      .first();
+    
+    if (!project) throw new Error(`Project "${args.projectSlug}" not found`);
+
+    const existingTasks = await ctx.db
+      .query("tasks")
+      .withIndex("by_project", (q) => q.eq("projectId", project._id))
+      .collect();
+
+    const taskId = await ctx.db.insert("tasks", {
+      projectId: project._id,
+      title: args.title,
+      status: "todo",
+      order: existingTasks.length,
+    });
+
+    // Log it
+    await ctx.db.insert("actionLogs", {
+      projectId: project._id,
+      taskId,
+      action: "created",
+      description: `➕ Added "${args.title}" to ${project.name}`,
+      timestamp: Date.now(),
+    });
+
+    return taskId;
   },
 });

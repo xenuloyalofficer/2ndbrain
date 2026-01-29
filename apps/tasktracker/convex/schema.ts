@@ -43,4 +43,12 @@ export default defineSchema({
     done: v.boolean(),
     order: v.number(),
   }).index("by_task", ["taskId"]),
+
+  actionLogs: defineTable({
+    projectId: v.optional(v.id("projects")),
+    taskId: v.optional(v.id("tasks")),
+    action: v.string(),
+    description: v.string(),
+    timestamp: v.number(),
+  }).index("by_timestamp", ["timestamp"]),
 });
