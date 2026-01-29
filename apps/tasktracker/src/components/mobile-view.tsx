@@ -215,12 +215,13 @@ function TaskRow({ task }: { task: any }) {
   const Icon = statusIcons[task.status as keyof typeof statusIcons];
 
   const cycleStatus = () => {
-    const next = {
+    const statusMap: Record<string, "todo" | "in_progress" | "done" | "blocked"> = {
       todo: "in_progress",
       in_progress: "done",
       done: "todo",
       blocked: "todo",
-    }[task.status] as "todo" | "in_progress" | "done" | "blocked";
+    };
+    const next = statusMap[task.status as string] || "todo";
     updateStatus({ id: task._id, status: next });
   };
 
