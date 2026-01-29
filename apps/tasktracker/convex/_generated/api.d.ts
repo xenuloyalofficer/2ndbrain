@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as actionLogs from "../actionLogs.js";
 import type * as projects from "../projects.js";
 import type * as seed from "../seed.js";
 import type * as subtasks from "../subtasks.js";
@@ -20,6 +21,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  actionLogs: typeof actionLogs;
   projects: typeof projects;
   seed: typeof seed;
   subtasks: typeof subtasks;

@@ -1,12 +1,12 @@
 "use client";
 
 import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { api } from "../../convex/_generated/api";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { ChevronRight, Circle, CheckCircle2, Clock, AlertCircle, Plus, Zap } from "lucide-react";
 import { useState } from "react";
-import { Id } from "../../../convex/_generated/dataModel";
+import { Id } from "../../convex/_generated/dataModel";
 
 const statusIcons = {
   todo: Circle,
