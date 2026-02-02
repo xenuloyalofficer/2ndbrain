@@ -1,9 +1,9 @@
 # Jocril E-commerce - Quick Context
 
-**Location**: `C:\Users\maria\Desktop\pessoal\jocril\SITES\loja-jocril`
+**Location**: `C:\Users\maria\Desktop\pessoal\jocril\SITES\loja-jocril` / `~/active-projects/jocril/`
 **Status**: Active
 **Priority**: Medium
-**Last Updated**: 2026-01-27
+**Last Updated**: 2026-02-01
 
 ---
 
@@ -31,7 +31,7 @@ An **e-commerce platform** for **Jocril Acrílicos** (professional acrylic displ
 
 ### ⚠️ What's Incomplete
 
-- **Product import** - Need to finalize product/pricing data
+- **Product import** - Back office fixed, upload functionality working. ~2 hours remaining to complete all file uploads
 - **Store finalization** - Still in setup phase
 - **RLS policies** - Legacy Supabase Auth RLS (not compatible with Clerk)
 
@@ -125,11 +125,12 @@ AI_RULES.md               → Universal constraints (always applies)
 
 ## Next Steps
 
-1. **Import products and pricing** - Finalize product catalog
-2. **Finalize store setup** - Complete storefront features
-3. **Test checkout flow** - End-to-end testing
-4. **Deploy to production** - Launch store
-5. **Marketing plan** - Drive traffic
+1. **Complete file uploads** - ~2 hours remaining
+2. **Send to client** - Client will help with uploads and store placement
+3. **Finalize store setup** - Complete storefront features
+4. **Test checkout flow** - End-to-end testing
+5. **Deploy to production** - Launch store
+6. **Marketing plan** - Drive traffic
 
 ---
 

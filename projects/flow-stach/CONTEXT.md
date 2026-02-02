@@ -1,9 +1,9 @@
 # Flow Stach - Quick Context
 
-**Location**: `C:\Users\maria\Desktop\pessoal\FLOW_PARTY\flow-stach`
+**Location**: `C:\Users\maria\Desktop\pessoal\FLOW_PARTY\flow-stach` / `~/active-projects/flowbridge/`
 **Status**: Active
 **Priority**: High
-**Last Updated**: 2026-01-27
+**Last Updated**: 2026-02-01
 
 ---
 
