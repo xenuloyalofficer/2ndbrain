@@ -1,11 +1,12 @@
 # SOURCES INDEX (canonical memory inputs)
 
-- Local MEMORY source: `/home/mj/.openclaw/workspace/MEMORY.md`
-- Daily memory folder: `/home/mj/.openclaw/workspace/memory/`
-- Markdown files discovered: **27**
-- Active window cutoff: **2026-02-15**
+- Canonical memory authority: `/mnt/usb-ssd/repos/2ndbrain/ops/rune/`
+- Active local memory folder: `/home/mj/.openclaw/workspace/memory/`
+- Archive folder (pruned from active set): `/home/mj/.openclaw/workspace/memory_archive/2026-03-01/`
+- Active markdown files discovered: **18**
+- Archived markdown files (phase2 prune): **9**
 
-## Active-window files (keep hot)
+## Active local memory files
 - `2026-02-15.md`
 - `2026-02-17.md`
 - `2026-02-18.md`
@@ -25,7 +26,7 @@
 - `2026-02-28-1859.md`
 - `2026-03-01.md`
 
-## Archive-candidate files (non-destructive for now)
+## Archived files (not in active ingestion set)
 - `2026-01-31.md`
 - `2026-02-01.md`
 - `2026-02-08.md`
