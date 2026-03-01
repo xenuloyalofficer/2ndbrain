@@ -1,7 +1,17 @@
-# CURRENT (Rune)
+# CURRENT (Rune canonical)
 
-- Canonical memory path: `/mnt/usb-ssd/repos/2ndbrain/ops/rune/`.
-- Governing model policy: primary `openai-codex/gpt-5.3-codex`, fallback `kimi-coding/k2p5`, local LM Studio ops-only.
-- Heartbeat strategy: reduced cadence + Kimi for heartbeat jobs; critical reminders remain cron-driven.
-- LM Studio watchdog active via systemd timer (`rune-lmstudio-watchdog.timer`), checks every 60s.
-- OpenClaw gateway active; built-in memory search disabled during governed canary path.
+## Active operating state
+- Canonical memory authority: `/mnt/usb-ssd/repos/2ndbrain/ops/rune/`
+- Local workspace memory files are reference-only pointers.
+- Health watchdog: `rune-lmstudio-watchdog.timer` (60s deterministic check).
+- Heartbeat strategy: reduced cadence, cron is scheduler for critical reminders.
+
+## Model routing (current policy)
+- Primary heavy model: `openai-codex/gpt-5.3-codex`
+- Fallback: `kimi-coding/k2p5`
+- Local LM Studio: ops-only tiny tasks
+
+## Immediate priorities
+- Keep reminders/reports cron-backed.
+- Keep heartbeat lightweight and non-noisy.
+- Preserve deterministic checks before assumptions.

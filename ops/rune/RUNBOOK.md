@@ -1,32 +1,39 @@
-# RUNBOOK (Rune recovery)
+# RUNBOOK (Rune recovery + operations)
 
-## Canonical source of truth
-- Folder: `/mnt/usb-ssd/repos/2ndbrain/ops/rune/`
-- Core files:
-  - `MODEL_MAP.md`
-  - `MEMORY.sklite.md`
-  - `CURRENT.md`
-  - `RUNBOOK.md`
+## Canonical memory folder
+`/mnt/usb-ssd/repos/2ndbrain/ops/rune/`
 
-## Fast health checks
+## Canonical files (read first)
+1. `MODEL_MAP.md`
+2. `MEMORY.sklite.md`
+3. `CURRENT.md`
+4. `RUNBOOK.md`
+5. `SOURCES_INDEX.md`
+
+## Terminal read commands
+```bash
+less /mnt/usb-ssd/repos/2ndbrain/ops/rune/MODEL_MAP.md
+less /mnt/usb-ssd/repos/2ndbrain/ops/rune/MEMORY.sklite.md
+less /mnt/usb-ssd/repos/2ndbrain/ops/rune/CURRENT.md
+less /mnt/usb-ssd/repos/2ndbrain/ops/rune/RUNBOOK.md
+less /mnt/usb-ssd/repos/2ndbrain/ops/rune/SOURCES_INDEX.md
+```
+
+## Deterministic health checks
 ```bash
 curl -sS -m 2 http://127.0.0.1:1234/v1/models >/dev/null || systemctl --user restart openclaw-gateway.service
 systemctl --user status openclaw-gateway.service --no-pager --lines=20
 ```
 
-## Read docs in terminal
-```bash
-less /mnt/usb-ssd/repos/2ndbrain/ops/rune/MEMORY.sklite.md
-less /mnt/usb-ssd/repos/2ndbrain/ops/rune/CURRENT.md
-less /mnt/usb-ssd/repos/2ndbrain/ops/rune/RUNBOOK.md
-```
-
-## If runtime is unstable
-1. Keep system in read-only safe behavior.
-2. Do deterministic checks first (no guesses).
-3. Avoid GUI/VNC/Ollama startup attempts.
-4. Use canonical files above as rebuild baseline.
+## Memory authority rule
+- Canonical truth = `/mnt/usb-ssd/repos/2ndbrain/ops/rune/`
+- `~/.openclaw/workspace/MEMORY.md` and `~/.openclaw/workspace/memory/*.md` are non-canonical working references.
 
 ## Backup discipline
-- Commit/push canonical folder regularly.
-- If push fails: capture exact stderr and report it verbatim.
+```bash
+cd /mnt/usb-ssd/repos/2ndbrain
+git add ops/rune/
+git commit -m "rune: update canonical SKLite memory"
+git push
+```
+- If commit/push fails, report exact stderr (no guessing).
