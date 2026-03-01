@@ -1,16 +1,11 @@
-# SOURCES INDEX (migrated to canonical SKLite)
+# SOURCES INDEX (canonical memory inputs)
 
 - Local MEMORY source: `/home/mj/.openclaw/workspace/MEMORY.md`
-- Local daily-memory folder: `/home/mj/.openclaw/workspace/memory`
-- Markdown files indexed: **27**
+- Daily memory folder: `/home/mj/.openclaw/workspace/memory/`
+- Markdown files discovered: **27**
+- Active window cutoff: **2026-02-15**
 
-## Daily/notes files discovered
-- `2026-01-31.md`
-- `2026-02-01.md`
-- `2026-02-08.md`
-- `2026-02-09.md`
-- `2026-02-13.md`
-- `2026-02-14.md`
+## Active-window files (keep hot)
 - `2026-02-15.md`
 - `2026-02-17.md`
 - `2026-02-18.md`
@@ -29,6 +24,14 @@
 - `2026-02-28-1858.md`
 - `2026-02-28-1859.md`
 - `2026-03-01.md`
+
+## Archive-candidate files (non-destructive for now)
+- `2026-01-31.md`
+- `2026-02-01.md`
+- `2026-02-08.md`
+- `2026-02-09.md`
+- `2026-02-13.md`
+- `2026-02-14.md`
 - `flowbridge-dream-backlog.md`
 - `health-backup-2026-02-17.md`
 - `heartbeat-local-test-2026-02-24.md`
